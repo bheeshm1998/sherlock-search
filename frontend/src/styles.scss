@@ -1,0 +1,19 @@
+/* You can add global styles to this file, and also import other style files */
+/* You can add global styles to this file, and also import other style files */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+:root {
+  --primary: #2563eb;
+  --secondary: #6366f1;
+}
+
+.dark {
+  --primary: #3b82f6;
+  --secondary: #818cf8;
+}
+
+html {
+  scroll-behavior: smooth;
+}
