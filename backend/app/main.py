@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import search_routes
+from app.routes import search_routes, project_routes, debug_routes
 
 app = FastAPI(
     title="Enterprise Search API",
@@ -19,7 +19,9 @@ app.add_middleware(
 )
 
 # Include Routes
-app.include_router(search_routes.router, prefix="/api/search")
+# app.include_router(search_routes.router, prefix="/api")
+app.include_router(project_routes.router, prefix="/api")
+app.include_router(debug_routes.router, prefix="/api")
 
 @app.get("/")
 async def root():

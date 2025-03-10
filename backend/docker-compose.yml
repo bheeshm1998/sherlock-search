@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15  # Replace with desired Postgres version
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: abhishek  # Set your username
+      POSTGRES_PASSWORD: abhishek  # Set your password
+      POSTGRES_DB: abhishek  # Set your database name
+    ports:
+      - "5432:5432"  # Map Postgres port to host
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
