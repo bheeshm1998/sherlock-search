@@ -1,0 +1,3 @@
+ onEnterPress(event: any): void {
+    in the input-field Component, the parameter type should be KeyboardEvent
+    

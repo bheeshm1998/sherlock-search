@@ -1,0 +1,18 @@
+<div class="flex items-end border rounded-lg bg-white shadow-sm">
+    <textarea
+      [(ngModel)]="message"
+      (keydown.enter)="onEnterPress($event)"
+      rows="1"
+      class="flex-grow p-4 border-0 focus:ring-0 focus:outline-none resize-none rounded-tl-lg rounded-bl-lg"
+      placeholder="Message Claude..."
+    ></textarea>
+    <button
+      (click)="sendMessage()"
+      [disabled]="!message.trim()"
+      class="p-4 text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 rounded-tr-lg rounded-br-lg"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+      </svg>
+    </button>
+  </div>
