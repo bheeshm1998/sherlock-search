@@ -4,5 +4,5 @@ export interface Message {
     role: 'user' | 'assistant';
     timestamp: Date;
     projectId: string;
+    userId: string;
   }
-  

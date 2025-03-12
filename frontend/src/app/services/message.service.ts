@@ -48,7 +48,8 @@ export class MessageService {
       content,
       role: 'user',
       timestamp: new Date(),
-      projectId: this.currentProjectId
+      projectId: this.currentProjectId,
+      userId: uuidv4(),
     };
     
     this.messagesSignal.update(messages => [...messages, message]);
@@ -66,7 +67,8 @@ export class MessageService {
       content,
       role: 'assistant',
       timestamp: new Date(),
-      projectId: this.currentProjectId
+      projectId: this.currentProjectId,
+      userId: uuidv4()
     };
     
     this.messagesSignal.update(messages => [...messages, message]);
