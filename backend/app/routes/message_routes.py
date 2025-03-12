@@ -1,5 +1,8 @@
 from fastapi import APIRouter, HTTPException
+
+from app.schemas.chat import ChatRequest
 from app.schemas.message import MessageCreate, MessageResponse
+from app.services.chat_service import ChatService
 from app.services.message_service import MessageService
 from app.llm.llm_wrapper import LLMWrapper
 
@@ -54,3 +57,15 @@ def get_project_messages(project_id: str):
         return messages
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {e.__cause__.__str__()}")
+
+
+@router.post("/chat/")
+async def chat(request: ChatRequest):
+    try:
+        # Call the service to handle the chat logic
+        response = ChatService.handle_chat(request.message)
+        return {"response": response}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+

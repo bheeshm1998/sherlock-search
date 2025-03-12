@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import project_routes, debug_routes, message_routes
+from app.routes import project_routes, debug_routes, message_routes, document_routes
 
 app = FastAPI(
     title="Enterprise Search API",
@@ -23,7 +23,13 @@ app.add_middleware(
 app.include_router(project_routes.router, prefix="")
 app.include_router(debug_routes.router, prefix="")
 app.include_router(message_routes.router, prefix="")
+app.include_router(document_routes.router, prefix="")
 
 @app.get("/app")
 async def root():
     return {"message": "Enterprise Search Backend"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=7888)
