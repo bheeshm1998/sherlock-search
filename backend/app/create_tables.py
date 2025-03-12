@@ -1,6 +1,7 @@
 from app.database import Base, engine
 
 from app.models.project import Project
+from app.models.message import Message
 
 # Function to create all tables
 def create_tables():
