@@ -1,6 +1,10 @@
 from pinecone import Pinecone
-from openai import OpenAI
+from google.generativeai import GenerativeModel
+import google.generativeai as genai
 import os
+
+from app.routes.document_routes import get_gemini_embedding
+
 
 class ChatService:
     def __init__(self):
@@ -9,18 +13,16 @@ class ChatService:
         self.index_name = os.getenv("PINECONE_INDEX_NAME")
         self.index = self.pc.Index(self.index_name)
 
-        # Initialize OpenAI client
-        self.openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        # Initialize Gemini client
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        self.gemini_model = GenerativeModel("gemini-1.5-pro")
 
     def get_relevant_chunks(self, query: str, top_k: int = 5):
         """
         Retrieve relevant chunks from the Pinecone vector store based on the query.
         """
         # Generate embeddings for the query
-        query_embedding = self.openai_client.embeddings.create(
-            input=query,
-            model="text-embedding-ada-002"
-        ).data[0].embedding
+        query_embedding = get_gemini_embedding(query)
 
         # Query Pinecone for relevant chunks
         query_response = self.index.query(
@@ -38,24 +40,23 @@ class ChatService:
 
     def generate_chat_response(self, system_prompt: str, user_prompt: str):
         """
-        Generate a response using OpenAI's Chat API.
+        Generate a response using Gemini's Chat API.
         """
-        response = self.openai_client.chat.completions.create(
-            model="gpt-4",  # or "gpt-3.5-turbo"
-            messages=[
+        response = self.gemini_model.generate_content(
+            [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ]
         )
-        return response.choices[0].message.content
+        return response.text
 
-    @staticmethod
     def handle_chat(self, user_message: str):
         """
         Handle the chat logic:
         1. Retrieve relevant chunks from Pinecone.
-        2. Generate a response using OpenAI's Chat API.
+        2. Generate a response using Gemini's Chat API.
         """
+        print("user message is ", user_message)
         # Step 1: Get relevant chunks from Pinecone
         relevant_chunks = self.get_relevant_chunks(user_message)
 
@@ -67,11 +68,15 @@ class ChatService:
         user_prompt = f"""
         User's question: {user_message}
 
-        Relevant information:
-        {relevant_chunks}
+        Relevant information: My Name is Abhishek Anand
+         {relevant_chunks}
         """
 
-        # Step 3: Generate the response using OpenAI
-        response = self.generate_chat_response(system_prompt, user_prompt)
+        # Step 3: Generate the response using Gemini
+        print("system prompt is ", system_prompt)
+        print("user prompt is ", user_prompt)
+        response = self.gemini_model.generate_content(
+            [system_prompt, user_prompt]  # Gemini expects a list of strings
+        )
 
-        return response
+        return response.text

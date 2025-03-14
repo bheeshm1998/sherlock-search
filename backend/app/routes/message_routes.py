@@ -63,7 +63,9 @@ def get_project_messages(project_id: str):
 async def chat(request: ChatRequest):
     try:
         # Call the service to handle the chat logic
-        response = ChatService.handle_chat(request.message)
+        print("request.query is ", request.query);
+        chatService = ChatService()
+        response = chatService.handle_chat(user_message = request.query)
         return {"response": response}
 
     except Exception as e:
