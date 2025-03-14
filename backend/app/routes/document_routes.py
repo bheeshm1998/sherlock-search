@@ -1,19 +1,36 @@
 import os
 import tempfile
+import logging
+from typing import List
 
+import google.generativeai as genai
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, UploadFile, File
 
 from langchain_community.document_loaders import PyPDFLoader
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+# from pinecone import Pinecone
 
 from app.config.pinecone_init import llm, embeddings, pc
 
+from fastapi import APIRouter, UploadFile, File, HTTPException
+import tempfile
+import os
+
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+import pdfplumber  # Alternative to PyPDFLoader
+
+# Initialize Gemini API
 
 router = APIRouter()
 
 load_dotenv()
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+genai.configure(api_key=GEMINI_API_KEY)
+
+logger = logging.getLogger("uvicorn")
 
 # Get API keys and configuration from environment
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
@@ -23,45 +40,103 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 load_dotenv()
 
-@router.post("/upload-pdf/")
-async def upload_pdf(file: UploadFile = File(...)):
+# Function to get embeddings from Gemini
+def get_gemini_embedding(text: str) -> List[float]:
+    response = genai.embed_content(
+        model="models/embedding-001",  # Use Gemini's embedding model
+        content=text,
+        task_type="retrieval_document"  # Use retrieval_query for queries
+    )
+    return response["embedding"]  # Extracts the list of floats
+
+# @router.post("/upload-pdf/")
+# async def upload_pdf(file: UploadFile = File(...)):
+#     logger.info("File received successfully")
+#     try:
+#         # Save the uploaded file to a temporary file
+#         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+#             temp_file.write(await file.read())
+#             temp_file_path = temp_file.name
+#
+#         # Load the PDF and split it into chunks
+#         loader = PyPDFLoader(temp_file_path)
+#         documents = loader.load()
+#
+#         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+#         texts = text_splitter.split_documents(documents)
+#
+#         # Generate embeddings for each chunk
+#         print("text length ", texts.count)
+#         texts_embeddings = embeddings.embed_documents([text.page_content for text in texts])
+#         print("texts_embeddings_count", texts_embeddings.count())
+#         # Upsert embeddings into Pinecone
+#         index = pc.Index(PINECONE_INDEX_NAME)
+#         vectors = []
+#         for i, (text, embedding) in enumerate(zip(texts, texts_embeddings)):
+#             vectors.append({
+#                 "id": f"doc_{i}",
+#                 "values": embedding,
+#                 "metadata": {"text": text.page_content}
+#             })
+#
+#         index.upsert(vectors=vectors)
+#
+#         # Clean up the temporary file
+#         os.remove(temp_file_path)
+#
+#         return {"message": "PDF uploaded and processed successfully"}
+#
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/upload-pdf-2/")
+async def upload_pdf_2(file: UploadFile = File(...)):
+    print("YOYO")
     try:
-        # Save the uploaded file to a temporary file
+        # Save uploaded PDF temporarily
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
             temp_file.write(await file.read())
             temp_file_path = temp_file.name
 
-        # Load the PDF and split it into chunks
-        loader = PyPDFLoader(temp_file_path)
-        documents = loader.load()
+        # Extract text from PDF
+        texts = []
+        with pdfplumber.open(temp_file_path) as pdf:
+            for page in pdf.pages:
+                texts.append(page.extract_text())
 
+        # Split text into chunks
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-        texts = text_splitter.split_documents(documents)
+        text_chunks = text_splitter.split_text("\n".join(texts))
 
-        # Generate embeddings for each chunk
-        texts_embeddings = embeddings.embed_documents([text.page_content for text in texts])
+        # Generate embeddings using Gemini
 
-        # Upsert embeddings into Pinecone
-        index = pc.Index(PINECONE_INDEX_NAME)
-        vectors = []
-        for i, (text, embedding) in enumerate(zip(texts, texts_embeddings)):
-            vectors.append({
+        # Generate embeddings using Gemini
+        embeddings = [get_gemini_embedding(chunk) for chunk in text_chunks]
+
+        # Initialize Pinecone client
+        # pc = (api_key=PINECONE_API_KEY, environment=PINECONE_ENVIRONMENT)  # Use Pinecone, not pinecone
+        index = pc.Index(PINECONE_INDEX_NAME)  # Access Index from the Pinecone client
+
+        # Prepare and upsert embeddings into Pinecone
+        vectors = [
+            {
                 "id": f"doc_{i}",
                 "values": embedding,
-                "metadata": {"text": text.page_content}
-            })
+                "metadata": {"text": text}
+            }
+            for i, (text, embedding) in enumerate(zip(text_chunks, embeddings))
+        ]
 
         index.upsert(vectors=vectors)
 
-        # Clean up the temporary file
+        # Cleanup
         os.remove(temp_file_path)
 
         return {"message": "PDF uploaded and processed successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
 
 @router.get("/documents/")
 async def list_documents(limit: int = 10):

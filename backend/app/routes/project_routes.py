@@ -7,25 +7,6 @@ from app.services.project_service import ProjectService
 
 router = APIRouter()
 
-# Configuration: Set upload folder
-UPLOAD_FOLDER = "./uploaded_pdfs"
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
-
-@router.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
-    """
-    Endpoint to upload PDF files.
-    """
-    if not file.filename.endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Only PDF files are allowed")
-
-    file_location = os.path.join(UPLOAD_FOLDER, file.filename)
-    with open(file_location, "wb") as f:
-        f.write(await file.read())
-
-    return {"message": f"File '{file.filename}' uploaded successfully", "path": file_location}
-
 @router.get("/projects", response_model=List[ProjectResponse])
 async def get_projects():
     """
