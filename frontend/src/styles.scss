@@ -14,6 +14,11 @@
   --text-primary: #111827;
   --text-secondary: #4b5563;
   --text-muted: #6b7280;
+
+  --brand-blue: #3b82f6 /* 59 130 246; */ /* #3b82f6 */
+  --brand-indigo: #4f46e5 /* 79 70 229; */ /* #4f46e5 */
+  --brand-purple: #8b5cf6 /* 139 92 246; */ /* #8b5cf6 */
+  --brand-dark: #1e293b /* 30 41 59; */ /* #1e293b */
 }
 
 .dark {
@@ -131,4 +136,61 @@ body {
   &:nth-child(3) {
     animation-delay: 0.6s;
   }
+}
+
+.bg-brand-blue {
+  background-color: rgb(var(--brand-blue));
+}
+
+.bg-brand-indigo {
+  background-color: rgb(var(--brand-indigo));
+}
+
+.bg-brand-purple {
+  background-color: rgb(var(--brand-purple));
+}
+
+.bg-brand-dark {
+  background-color: rgb(var(--brand-dark));
+}
+
+.text-brand-blue {
+  color: rgb(var(--brand-blue));
+}
+
+.text-brand-indigo {
+  color: rgb(var(--brand-indigo));
+}
+
+.text-brand-purple {
+  color: rgb(var(--brand-purple));
+}
+
+.text-brand-dark {
+  color: rgb(var(--brand-dark));
+}
+
+/* For the background opacity variations */
+.bg-brand-blue\/10 {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.bg-brand-indigo\/10 {
+  background-color: rgba(79, 70, 229, 0.1);
+}
+
+.bg-brand-purple\/10 {
+  background-color: rgba(139, 92, 246, 0.1);
+}
+
+.hover\:bg-brand-blue\/90:hover {
+  background-color: rgba(59, 130, 246, 0.9);
+}
+
+.hover\:bg-brand-indigo\/90:hover {
+  background-color: rgba(79, 70, 229, 0.9);
+}
+
+.hover\:bg-brand-purple\/90:hover {
+  background-color: rgba(139, 92, 246, 0.9);
 }
