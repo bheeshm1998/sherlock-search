@@ -4,6 +4,9 @@ from typing import List
 
 import google.generativeai as genai
 from dotenv import load_dotenv
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+from app.services.blob_storage_service import upload_to_s3
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -15,7 +18,6 @@ from fastapi import APIRouter, UploadFile, File, HTTPException
 import tempfile
 import os
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 import pdfplumber  # Alternative to PyPDFLoader
 
 # Initialize Gemini API
@@ -54,6 +56,11 @@ async def upload_pdf_2(file: UploadFile = File(...)):
             temp_file.write(await file.read())
             temp_file_path = temp_file.name
 
+            # Upload file to S3
+
+            s3_url = upload_to_s3(temp_file_path, file.filename)
+
+
         # Extract text from PDF
         texts = []
         with pdfplumber.open(temp_file_path) as pdf:
@@ -88,7 +95,7 @@ async def upload_pdf_2(file: UploadFile = File(...)):
         # Cleanup
         os.remove(temp_file_path)
 
-        return {"message": "PDF uploaded and processed successfully"}
+        return {"message": "PDF uploaded and processed successfully", "s3_url": s3_url}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

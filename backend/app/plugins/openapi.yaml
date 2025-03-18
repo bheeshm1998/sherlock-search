@@ -1,0 +1,31 @@
+openapi: 3.0.1
+info:
+  title: Payoda Chat API
+  description: API for chatting with Payoda enterprise documents
+  version: "1.0.0"
+servers:
+  - url: https://your-api-url.com
+paths:
+  /chat/:
+    post:
+      summary: Chat with AI
+      operationId: chatWithAI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Chat response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: string

@@ -1,8 +1,12 @@
 from fastapi import APIRouter, HTTPException
 
+from app.config.pinecone_init import pc
+from app.schemas.GeminiChat import GeminiChatRequest
 from app.schemas.chat import ChatRequest
-from app.schemas.message import MessageCreate, MessageResponse
+from app.schemas.message import MessageResponse
 from app.services.chat_service import ChatService
+from app.services.gemini_chat_service import GeminiChatService
+from app.services.intent_service import IntentService
 from app.services.message_service import MessageService
 
 
@@ -33,3 +37,45 @@ async def chat(request: ChatRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@router.post("/validate_query")
+async def validate_user_query(query: str):
+    """
+    API endpoint to validate user query before forwarding to LLM.
+
+    :param query: User's query string
+    :return: Validation response
+    """
+
+    # Initialize vector database
+
+    # Allowed topics/documents the user can query about
+    allowed_contexts = ["machine learning", "AI models", "document processing"]
+
+    # Create an IntentService instance
+    intent_service = IntentService(vector_database=pc, allowed_contexts=allowed_contexts)
+
+    is_valid, reason = intent_service.validate_query(query)
+    if not is_valid:
+        return {"success": False, "message": reason}
+
+    # Query is valid; pass it forward to the LLM
+    chatService = ChatService()
+    response = chatService.handle_chat(user_message = query)
+    return {"success": True, "response": response}
+
+@router.post("/chat-with-gemini/")
+async def chat_with_gemini(request: ChatRequest):
+    try:
+        # Call Gemini API
+        response = GeminiChatService.handleChat(request)
+        return response
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Integration with firebase auth routes
+# @router.get("/chat/")
+# async def chat_with_ai(user: str = Depends(verify_user)):
+#     return {"message": f"Hello {user}, how can I help you?"}

@@ -1,7 +1,5 @@
 import os
 
-from langchain_community.embeddings import OpenAIEmbeddings
-from langchain.chat_models import ChatOpenAI
 from dotenv import load_dotenv
 from pinecone import Pinecone, ServerlessSpec
 
@@ -13,8 +11,6 @@ PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_ENVIRONMENT = os.getenv("PINECONE_ENVIRONMENT")
 PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME")
 # OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
-from langchain_community.chat_models import ChatOpenAI
 
 # Initialize Pinecone
 pc = Pinecone(api_key=PINECONE_API_KEY)

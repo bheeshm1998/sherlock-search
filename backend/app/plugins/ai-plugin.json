@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Payoda Enterprise Chat",
+  "name_for_model": "payoda_chat",
+  "description_for_human": "Chatbot for Payoda employees.",
+  "description_for_model": "Retrieves enterprise data for Payoda employees.",
+  "auth": {
+    "type": "oauth",
+    "client_url": "https://your-api-url.com/oauth"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://your-api-url.com/openapi.yaml"
+  },
+  "logo_url": "https://your-api-url.com/logo.png",
+  "contact_email": "support@payoda.com",
+  "legal_info_url": "https://yourdomain.com/legal"
+}
