@@ -1,21 +1,15 @@
-import os
-import tempfile
+
 import logging
 from typing import List
 
 import google.generativeai as genai
 from dotenv import load_dotenv
-from fastapi import APIRouter, HTTPException, UploadFile, File
-
-from langchain_community.document_loaders import PyPDFLoader
-
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-from app.config.pinecone_init import llm, embeddings, pc
+from app.config.pinecone_init import pc
 
 from fastapi import APIRouter, UploadFile, File, HTTPException
 import tempfile
@@ -39,7 +33,7 @@ logger = logging.getLogger("uvicorn")
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_ENVIRONMENT = os.getenv("PINECONE_ENVIRONMENT")
 PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 load_dotenv()
 

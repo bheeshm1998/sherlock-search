@@ -1,5 +1,4 @@
-import os
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, HTTPException
 from typing import List
 
 from app.schemas.project import ProjectCreate, ProjectResponse

@@ -3,7 +3,6 @@ from uuid import uuid4
 from datetime import datetime
 from typing import List
 from app.database import get_db
-from app.database import SessionLocal
 from app.models.project import Project
 from app.schemas.project import ProjectCreate, ProjectResponse
 

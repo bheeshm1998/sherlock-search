@@ -12,12 +12,9 @@ load_dotenv()
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_ENVIRONMENT = os.getenv("PINECONE_ENVIRONMENT")
 PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 from langchain_community.chat_models import ChatOpenAI
-print("PINECONE_API_KEY", os.getenv("PINECONE_API_KEY"))
-
-print("OPENAI_API_KEY", OPENAI_API_KEY)
 
 # Initialize Pinecone
 pc = Pinecone(api_key=PINECONE_API_KEY)
@@ -36,15 +33,16 @@ if PINECONE_INDEX_NAME not in pc.list_indexes().names():
     )
 
 # Initialize embeddings
-embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
+# embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
 
 
 # Initialize LLM
-llm = ChatOpenAI(
-    model_name="gpt-3.5-turbo",
-    temperature=0,
-    api_key=OPENAI_API_KEY
-)
+# llm = ChatOpenAI(
+#     model_name="gpt-3.5-turbo",
+#     temperature=0,
+#     api_key=OPENAI_API_KEY
+# )
 
 # Export initialized objects for later use
-__all__ = ["llm", "embeddings", "pc"]
+# __all__ = ["llm", "embeddings", "pc"]
+__all__ = ["pc"]
