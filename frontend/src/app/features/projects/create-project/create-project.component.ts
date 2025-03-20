@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 interface Document {
   id: number;
@@ -28,12 +29,19 @@ export class CreateProjectComponent {
   };
 
   documents: Document[] = [];
+  pageTitle = 'Create Project';
   maxDocumentsPerUpload = 5;
   maxTotalDocuments = 20;
   documentTypes = ['PDF', 'DOCX', 'XLS', 'PPT', 'TXT', 'CSV', 'ZIP', 'Other'];
   accessTypes = ['Private', 'Restricted', 'Public'];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private route: ActivatedRoute) {}
+
+  ngOnInit(){
+    this.route.paramMap.subscribe(params => {
+      this.pageTitle = params.has('id') ? 'Edit Project' : 'Create New Project';
+    });
+  }
 
   getFileExtension(filename: string): string {
     return filename.split('.').pop()?.toUpperCase() || 'Unknown';

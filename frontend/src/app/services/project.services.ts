@@ -40,7 +40,8 @@ export class ProjectService {
       name,
       description,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
+      documents: []
     };
     
     this.projectsSignal.update(projects => [...projects, newProject]);

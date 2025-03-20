@@ -54,11 +54,11 @@ export class AdminDashboardComponent {
   constructor(private router: Router) {}
 
   navigateToCreateProject(): void {
-    this.router.navigate(['/project']);
+    this.router.navigate(['/create-project']);
   }
 
   openProject(id: number): void {
     // Navigate to project details page
-    this.router.navigate(['/project', id]);
+    this.router.navigate(['/project-details', id]);
   }
 }

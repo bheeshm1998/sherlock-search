@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
   styleUrl: './landing-page.component.scss'
 })
 export class LandingPageComponent {
-  userType: 'enduser' | 'admin' = 'enduser';
+  userType: 'enduser' | 'admin' = 'admin';
   
   constructor(private router: Router) {}
 
