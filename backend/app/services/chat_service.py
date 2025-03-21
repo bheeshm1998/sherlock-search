@@ -68,7 +68,7 @@ class ChatService:
         user_prompt = f"""
         User's question: {user_message}
 
-        Relevant information: My Name is Abhishek Anand
+        Relevant information:
          {relevant_chunks}
         """
 

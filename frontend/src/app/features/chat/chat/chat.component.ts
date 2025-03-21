@@ -10,6 +10,7 @@ import { HeaderComponent } from '../../../components/header/header.component';
 import { NgFor, NgIf, AsyncPipe, DatePipe } from '@angular/common';
 import { InputFieldComponent } from '../../../components/input-field/input-field.component';
 import { MessageBubbleComponent } from '../../../components/message-bubble/message-bubble.component';
+import { ChatService } from '../../../services/chat.service';
 
 @Component({
   selector: 'app-chat',
@@ -35,7 +36,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     private router: Router,
     private messageService: MessageService,
     private projectService: ProjectService,
-    private llmService: LlmService
+    private chatService: ChatService
   ) {}
   
   ngOnInit(): void {
@@ -51,7 +52,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       })
     );
     
-    this.faqs = this.llmService.getFAQs();
+    this.faqs = this.chatService.getFAQs();
   }
   
   ngAfterViewChecked(): void {
@@ -78,7 +79,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     
     // Get response from LLM service
     this.subscriptions.push(
-      this.llmService.generateResponse(content).subscribe({
+      this.chatService.generateResponse(content).subscribe({
         next: (response) => {
           this.messageService.addAssistantMessage(response);
           this.isLoading = false;
@@ -109,7 +110,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
   
   navigateToProjects(): void {
-    this.router.navigate(['/projects']);
+    this.router.navigate(['/admin-dashboard']);
   }
   
   private scrollToBottom(): void {
