@@ -26,13 +26,6 @@ export class CreateProjectComponent {
   isSubmitting: boolean = false;
   projectForm!: FormGroup;
 
-  project = {
-    name: '',
-    description: '',
-    documentType: '',
-    accessType: 'private'
-  };
-
   documents: Document[] = [];
   pageTitle = 'Create Project';
   maxDocumentsPerUpload = 5;
@@ -125,9 +118,9 @@ export class CreateProjectComponent {
 
       // Prepare project data
       const projectData = {
-        name: this.project.name,
-        description: this.project.description || '',
-        access_type: this.project.accessType,
+        name: this.projectForm.get('name')?.value,
+        description: this.projectForm.get('description')?.value,
+        access_type: this.projectForm.get('accessType')?.value,
         state: 'DRAFT'
       };
 

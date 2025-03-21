@@ -157,12 +157,12 @@ class ProjectService:
                             temp_file_path = temp_file.name
 
                         # Upload to S3
-                        try:
-                            s3_url = upload_to_s3(temp_file_path, doc_data.name)
-                            new_document.s3_url = s3_url  # Add this field to your Document model
-                        except Exception as e:
-                            print(f"S3 upload error: {str(e)}")
-
+                        # try:
+                        #     s3_url = upload_to_s3(temp_file_path, doc_data.name)
+                        #     new_document.s3_url = s3_url  # Add this field to your Document model
+                        # except Exception as e:
+                        #     print(f"S3 upload error: {str(e)}")
+                        new_document.s3_url = "default"
                         # For PDF files, extract text and create embeddings
                         if doc_data.file_extension and doc_data.file_extension.lower() == 'pdf':
                             try:
@@ -174,7 +174,7 @@ class ProjectService:
                                         if page_text:
                                             texts.append(page_text)
 
-                                if texts and 'pc' in locals() and 'index' in locals():
+                                if texts and index:
                                     # Split text into chunks
                                     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
                                     text_chunks = text_splitter.split_text("\n".join(texts))

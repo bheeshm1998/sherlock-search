@@ -5,7 +5,8 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-input-field',
   standalone: true,
   imports: [FormsModule],
-  template: './input-field.component.html',
+  templateUrl: './input-field.component.html',
+  styleUrl: './input-field.component.scss'
 })
 export class InputFieldComponent {
   @ViewChild('messageInput') messageInput!: ElementRef<HTMLTextAreaElement>;
@@ -26,7 +27,7 @@ export class InputFieldComponent {
     }
   }
   
-  handleEnter(event: KeyboardEvent): void {
+  handleEnter(event: any): void {
     // Send message on Enter (but allow Shift+Enter for new lines)
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();

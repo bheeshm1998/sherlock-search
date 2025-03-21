@@ -6,7 +6,8 @@ from app.routes import project_routes, debug_routes, message_routes, document_ro
 app = FastAPI(
     title="Enterprise Search API",
     description="RAG-powered enterprise search backend",
-    version="0.1.0"
+    version="0.1.0",
+    debug= True
 )
 
 # CORS Middleware
@@ -38,4 +39,4 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=7888)
+    uvicorn.run(app, host="0.0.0.0", port=7888, log_level="debug")
