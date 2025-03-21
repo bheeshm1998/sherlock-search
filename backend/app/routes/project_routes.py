@@ -1,7 +1,9 @@
-from fastapi import APIRouter, HTTPException
-from typing import List
+import json
 
-from app.schemas.project import ProjectCreate, ProjectResponse
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from typing import List, Optional
+
+from app.schemas.project import ProjectCreate, ProjectResponse, DocumentCreate
 from app.services.project_service import ProjectService
 
 router = APIRouter()
@@ -21,6 +23,55 @@ async def create_project(project_data: ProjectCreate):
     """
     project = ProjectService.create_project(project_data)
     return project
+
+
+@router.post("/projectsv2", response_model=ProjectResponse)
+async def create_project_v2(
+        project_data: str = Form(...),
+        files: Optional[List[UploadFile]] = File(None)
+):
+    """
+    Create a new project with optional document uploads.
+
+    - project_data: JSON string containing project information
+    - files: Optional list of files to upload
+    """
+    try:
+        # Parse project data
+        project_dict = json.loads(project_data)
+        project_create = ProjectCreate(**project_dict)
+
+        # Process files if provided
+        file_info_list = []
+        if files:
+            for file in files:
+                # Extract file info
+                filename = file.filename
+                content = await file.read()
+                size = len(content)
+                file_extension = filename.split('.')[-1] if '.' in filename else None
+
+                # Create document data
+                doc_data = DocumentCreate(
+                    name=filename,
+                    description=filename,  # You can customize this
+                    document_type=file_extension.upper() if file_extension else "UNKNOWN",
+                    file_extension=file_extension,
+                    size=str(size)  # Convert to string as per your schema
+                )
+
+                # Add to file info list
+                file_info_list.append({
+                    "file": filename,
+                    "file_obj": content,
+                    "doc_data": doc_data
+                })
+
+        # Create project with documents
+        project = ProjectService.create_project_v2(project_create, file_info_list)
+        return project
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/projects/{project_id}", response_model=ProjectResponse)
 async def update_project(project_id: str, updated_data: dict):

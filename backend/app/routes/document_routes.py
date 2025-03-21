@@ -1,12 +1,10 @@
 
 import logging
-from typing import List
-
-import google.generativeai as genai
 from dotenv import load_dotenv
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from app.services.blob_storage_service import upload_to_s3
+from app.utils.embeddings import get_gemini_embedding
+from app.utils.s3 import upload_to_s3
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -26,9 +24,6 @@ router = APIRouter()
 
 load_dotenv()
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=GEMINI_API_KEY)
-
 logger = logging.getLogger("uvicorn")
 
 # Get API keys and configuration from environment
@@ -38,15 +33,6 @@ PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME")
 # OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 load_dotenv()
-
-# Function to get embeddings from Gemini
-def get_gemini_embedding(text: str) -> List[float]:
-    response = genai.embed_content(
-        model="models/embedding-001",  # Use Gemini's embedding model
-        content=text,
-        task_type="retrieval_document"  # Use retrieval_query for queries
-    )
-    return response["embedding"]  # Extracts the list of floats
 
 @router.post("/upload-pdf/")
 async def upload_pdf_2(file: UploadFile = File(...)):
@@ -100,8 +86,8 @@ async def upload_pdf_2(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/documents/")
-async def list_documents(limit: int = 10):
+@router.get("/documents/{project_id}")
+async def list_documents(project_id: str, limit: int = 10):
     try:
         # Get the Pinecone index
         index = pc.Index(PINECONE_INDEX_NAME)

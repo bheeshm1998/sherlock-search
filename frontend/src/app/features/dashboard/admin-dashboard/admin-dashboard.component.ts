@@ -59,6 +59,6 @@ export class AdminDashboardComponent {
 
   openProject(id: number): void {
     // Navigate to project details page
-    this.router.navigate(['/project', id]);
+    this.router.navigate(['/project-details', id]);
   }
 }

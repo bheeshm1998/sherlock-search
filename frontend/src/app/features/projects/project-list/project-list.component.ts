@@ -5,11 +5,12 @@ import { HeaderComponent } from '../../../components/header/header.component';
 import { ProjectService } from '../../../services/project.services';
 import { Router } from '@angular/router';
 import { Project } from '../../../models/project.model';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-project-list',
   standalone: true,
-  imports:  [HeaderComponent, NgFor, NgIf, DatePipe, FormsModule],
+  imports:  [HeaderComponent, NgFor, NgIf, DatePipe, FormsModule, HttpClientModule],
   templateUrl: './project-list.component.html',
   styleUrl: './project-list.component.scss'
 })
@@ -18,10 +19,21 @@ export class ProjectListComponent implements OnInit {
   showNewProjectForm = false;
   newProjectName = '';
   newProjectDescription = '';
+  content: string = "not active";
   
-  constructor(private projectService: ProjectService, private router: Router) {}
+  constructor(private projectService: ProjectService, private router: Router,  private http: HttpClient) {}
   
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.http.get('http://localhost:7888/debug')
+      .subscribe((data: any) => {
+        console.log(data);
+        this.content = data.status
+        // Handle the data from the API
+      }, (error) => {
+        console.error('Error fetching projects', error);
+      });
+
+  }
   
   createProject(): void {
     if (this.newProjectName.trim()) {

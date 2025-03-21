@@ -1,15 +1,16 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-landing-page',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './landing-page.component.html',
   styleUrl: './landing-page.component.scss'
 })
 export class LandingPageComponent {
-  userType: 'enduser' | 'admin' = 'enduser';
+  userType: 'enduser' | 'admin' = 'admin';
   
   constructor(private router: Router) {}
 

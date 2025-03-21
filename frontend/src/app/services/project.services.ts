@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { Project } from '../models/project.model';
+import { Project, ProjectState } from '../models/project.model';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable({
@@ -40,7 +40,9 @@ export class ProjectService {
       name,
       description,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
+      documents: [],
+      state: ProjectState.DRAFT
     };
     
     this.projectsSignal.update(projects => [...projects, newProject]);

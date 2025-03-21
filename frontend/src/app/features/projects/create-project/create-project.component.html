@@ -1,167 +1,131 @@
-<!-- create-project.component.html -->
 <div class="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100 p-6">
-    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-      <!-- Header -->
-      <div class="bg-blue-600 p-6">
-        <h1 class="text-2xl font-bold text-white">Create New Project</h1>
-        <p class="text-blue-100">Add project details and upload documents</p>
-      </div>
-  
-      <!-- Form -->
-      <div class="p-6">
-        <form (ngSubmit)="createProject()">
-          <!-- Project Details Section -->
-          <div class="mb-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Project Details</h2>
-            
-            <div class="grid grid-cols-1 gap-6">
-              <div>
-                <label for="projectName" class="block text-sm font-medium text-gray-700 mb-1">Project Name *</label>
-                <input 
-                  type="text" 
-                  id="projectName" 
-                  name="projectName" 
-                  [(ngModel)]="project.name" 
-                  required
-                  class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter project name">
-              </div>
-              
-              <div>
-                <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea 
-                  id="description" 
-                  name="description" 
-                  [(ngModel)]="project.description" 
-                  rows="3"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter project description"></textarea>
-              </div>
-              
-              <div>
-                <label for="documentType" class="block text-sm font-medium text-gray-700 mb-1">Document Type</label>
-                <select 
-                  id="documentType" 
-                  name="documentType" 
-                  [(ngModel)]="project.documentType"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="" disabled selected>Select document type</option>
-                  @for (type of documentTypes; track type) {
-                    <option [value]="type">{{ type }}</option>
-                  }
-                </select>
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Access Type</label>
-                <div class="flex space-x-4">
-                  @for (type of accessTypes; track type) {
-                    <label class="flex items-center">
-                      <input 
-                        type="radio" 
-                        name="accessType" 
-                        [value]="type.toLowerCase()" 
-                        [(ngModel)]="project.accessType"
-                        class="mr-2 h-4 w-4 text-blue-600">
-                      {{ type }}
-                    </label>
-                  }
-                </div>
+  <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+    <!-- Header -->
+    <div class="bg-blue-600 p-6">
+      <h1 class="text-2xl font-bold text-white">{{pageTitle}}</h1>
+      <p class="text-blue-100">Add project details and upload documents</p>
+    </div>
+
+    <!-- Form -->
+    <div class="p-6">
+      <form [formGroup]="projectForm" (ngSubmit)="createProject()">
+        <!-- Project Details Section -->
+        <div class="mb-8">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Project Details</h2>
+
+          <div class="grid grid-cols-1 gap-6">
+            <div>
+              <label for="projectName" class="block text-sm font-medium text-gray-700 mb-1">Project Name *</label>
+              <input type="text" id="projectName" formControlName="name" required
+                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter project name">
+              <div *ngIf="projectForm.get('name')?.invalid && projectForm.get('name')?.touched" class="text-red-500 text-sm mt-1">
+                Project name is required
               </div>
             </div>
-          </div>
-  
-          <!-- Document Upload Section -->
-          <div class="mb-8">
-            <div class="flex justify-between items-center mb-4">
-              <h2 class="text-xl font-semibold text-gray-800">Documents</h2>
-              <div class="text-sm text-gray-500">
-                {{ documents.length }}/{{ maxTotalDocuments }} documents uploaded
-              </div>
+
+            <div>
+              <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea id="description" formControlName="description" rows="3"
+                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter project description"></textarea>
             </div>
-  
-            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center bg-gray-50 mb-6">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-              <p class="text-gray-600 mb-2">Drag and drop files here or click to browse</p>
-              <p class="text-xs text-gray-500 mb-4">Maximum {{ maxDocumentsPerUpload }} files per upload, {{ maxTotalDocuments }} files per project</p>
-              <input 
-                type="file" 
-                id="fileUpload" 
-                multiple 
-                class="hidden" 
-                (change)="onFileSelected($event)"
-                [disabled]="documents.length >= maxTotalDocuments">
-              <label 
-                for="fileUpload" 
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg cursor-pointer"
-                [class.opacity-50]="documents.length >= maxTotalDocuments"
-                [class.cursor-not-allowed]="documents.length >= maxTotalDocuments">
-                Browse Files
-              </label>
-            </div>
-  
-            @if (documents.length > 0) {
-              <div class="space-y-4">
-                @for (doc of documents; track doc.id; let i = $index) {
-                  <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <div class="flex items-start">
-                      <!-- File Icon/Thumbnail -->
-                      <div class="flex-shrink-0 mr-4">
-                        <div class="w-12 h-12 flex items-center justify-center bg-blue-100 rounded text-blue-600">
-                          <span class="font-bold">{{ doc.type }}</span>
-                        </div>
-                      </div>
-  
-                      <!-- File Details -->
-                      <div class="flex-grow">
-                        <h3 class="text-sm font-medium text-gray-900 truncate">{{ doc.name }}</h3>
-                        <p class="text-xs text-gray-500">{{ formatFileSize(doc.size) }}</p>
-                        
-                        <div class="mt-2">
-                          <label class="text-xs text-gray-700">Document Description</label>
-                          <input 
-                            type="text" 
-                            [(ngModel)]="doc.description" 
-                            [name]="'docDescription' + i"
-                            class="w-full mt-1 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                      </div>
-  
-                      <!-- Remove Button -->
-                      <button 
-                        type="button" 
-                        class="flex-shrink-0 ml-2 text-red-500 hover:text-red-700"
-                        (click)="removeDocument(i)">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
+
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Access Type</label>
+              <div class="flex space-x-4">
+                @for (type of accessTypes; track type) {
+                <label class="flex items-center">
+                  <input type="radio" formControlName="accessType" [value]="type.toLowerCase()"
+                    class="mr-2 h-4 w-4 text-blue-600">
+                  {{ type }}
+                </label>
                 }
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Document Upload Section -->
+        <div class="mb-8">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-gray-800">Documents</h2>
+            <div class="text-sm text-gray-500">
+              {{ documents.length }}/{{ maxTotalDocuments }} documents uploaded
+            </div>
+          </div>
+
+          <div
+            class="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center bg-gray-50 mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            <p class="text-gray-600 mb-2">Drag and drop files here or click to browse</p>
+            <p class="text-xs text-gray-500 mb-4">Maximum {{ maxDocumentsPerUpload }} files per upload, {{
+              maxTotalDocuments }} files per project</p>
+            <input type="file" id="fileUpload" multiple class="hidden" (change)="onFileSelected($event)"
+              [disabled]="documents.length >= maxTotalDocuments">
+            <label for="fileUpload" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg cursor-pointer"
+              [class.opacity-50]="documents.length >= maxTotalDocuments"
+              [class.cursor-not-allowed]="documents.length >= maxTotalDocuments">
+              Browse Files
+            </label>
+          </div>
+
+          @if (documents.length > 0) {
+          <div class="space-y-4">
+            @for (doc of documents; track doc.id; let i = $index) {
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <div class="flex items-start">
+                <!-- File Icon/Thumbnail -->
+                <div class="flex-shrink-0 mr-4">
+                  <div class="w-12 h-12 flex items-center justify-center bg-blue-100 rounded text-blue-600">
+                    <span class="font-bold">{{ doc.type }}</span>
+                  </div>
+                </div>
+
+                <!-- File Details -->
+                <div class="flex-grow">
+                  <h3 class="text-sm font-medium text-gray-900 truncate">{{ doc.name }}</h3>
+                  <p class="text-xs text-gray-500">{{ formatFileSize(doc.size) }}</p>
+
+                  <div class="mt-2">
+                    <label class="text-xs text-gray-700">Document Description</label>
+                    <input type="text" [(ngModel)]="doc.description" [ngModelOptions]="{standalone: true}"
+                      class="w-full mt-1 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  </div>
+                </div>
+
+                <!-- Remove Button -->
+                <button type="button" class="flex-shrink-0 ml-2 text-red-500 hover:text-red-700"
+                  (click)="removeDocument(i)">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
             }
           </div>
-  
-          <!-- Form Actions -->
-          <div class="flex justify-end space-x-4">
-            <button 
-              type="button" 
-              class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-              (click)="cancel()">
-              Cancel
-            </button>
-            <button 
-              type="submit" 
-              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              [disabled]="!project.name">
-              Create Project
-            </button>
-          </div>
-        </form>
-      </div>
+          }
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-4">
+          <button type="button" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            (click)="cancel()">
+            Cancel
+          </button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            [disabled]="projectForm.invalid">
+            Create Project
+          </button>
+        </div>
+      </form>
     </div>
   </div>
-  
+</div>
