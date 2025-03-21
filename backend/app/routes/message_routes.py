@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
 from app.config.pinecone_init import pc
-from app.schemas.GeminiChat import GeminiChatRequest
+from app.schemas.gemini_chat import GeminiChatRequest
 from app.schemas.chat import ChatRequest
 from app.schemas.message import MessageResponse
 from app.services.chat_service import ChatService

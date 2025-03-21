@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
-import { Project } from '../../../models/project.model';
+import { Project, ProjectState } from '../../../models/project.model';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -19,6 +19,7 @@ export class ProjectDetailsComponent {
     createdAt: new Date("2023-10-01T09:00:00Z"),
     updatedAt: new Date("2023-10-15T14:30:00Z"),
     accessType: "private",
+    state: ProjectState.DRAFT,
     documents: [
       {
         id: "doc-67890",
@@ -54,6 +55,11 @@ export class ProjectDetailsComponent {
 
   editProject() {
     this.router.navigate(['/edit-project', this.project.id]);
+  }
+
+  openChat() {
+    console.log("Navigating to the chat component")
+    this.router.navigate(['/chat', 1]);
   }
 
   deleteProject() {

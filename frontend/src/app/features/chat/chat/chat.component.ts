@@ -36,16 +36,21 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     private messageService: MessageService,
     private projectService: ProjectService,
     private llmService: LlmService
-  ) {}
+  ) {
+    console.log('Chat component constructor')
+  }
   
   ngOnInit(): void {
+    console.log('Chat component init')
     this.subscriptions.push(
       this.route.paramMap.subscribe(params => {
         const id = params.get('id');
         if (id) {
+          console.log('Chat component init with id:', id)
           this.projectId = id;
           this.loadProject();
         } else {
+          console.log('Chat component init without id')
           this.router.navigate(['/projects']);
         }
       })
@@ -65,10 +70,10 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   
   private loadProject(): void {
     this.currentProject = this.projectService.getProject(this.projectId);
-    if (!this.currentProject) {
-      this.router.navigate(['/projects']);
-      return;
-    }
+    // if (!this.currentProject) {
+    //   this.router.navigate(['/projects']);
+    //   return;
+    // }
     
     this.messageService.loadMessagesForProject(this.projectId);
   }

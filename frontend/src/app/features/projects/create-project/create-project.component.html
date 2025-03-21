@@ -1,4 +1,3 @@
-<!-- create-project.component.html -->
 <div class="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100 p-6">
   <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
     <!-- Header -->
@@ -9,7 +8,7 @@
 
     <!-- Form -->
     <div class="p-6">
-      <form (ngSubmit)="createProject()">
+      <form [formGroup]="projectForm" (ngSubmit)="createProject()">
         <!-- Project Details Section -->
         <div class="mb-8">
           <h2 class="text-xl font-semibold text-gray-800 mb-4">Project Details</h2>
@@ -17,35 +16,28 @@
           <div class="grid grid-cols-1 gap-6">
             <div>
               <label for="projectName" class="block text-sm font-medium text-gray-700 mb-1">Project Name *</label>
-              <input type="text" id="projectName" name="projectName" [(ngModel)]="project.name" required
+              <input type="text" id="projectName" formControlName="name" required
                 class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter project name">
+              <div *ngIf="projectForm.get('name')?.invalid && projectForm.get('name')?.touched" class="text-red-500 text-sm mt-1">
+                Project name is required
+              </div>
             </div>
 
             <div>
               <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-              <textarea id="description" name="description" [(ngModel)]="project.description" rows="3"
+              <textarea id="description" formControlName="description" rows="3"
                 class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter project description"></textarea>
             </div>
 
-            <div>
-              <label for="documentType" class="block text-sm font-medium text-gray-700 mb-1">Document Type</label>
-              <select id="documentType" name="documentType" [(ngModel)]="project.documentType"
-                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="" disabled selected>Select document type</option>
-                @for (type of documentTypes; track type) {
-                <option [value]="type">{{ type }}</option>
-                }
-              </select>
-            </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Access Type</label>
               <div class="flex space-x-4">
                 @for (type of accessTypes; track type) {
                 <label class="flex items-center">
-                  <input type="radio" name="accessType" [value]="type.toLowerCase()" [(ngModel)]="project.accessType"
+                  <input type="radio" formControlName="accessType" [value]="type.toLowerCase()"
                     class="mr-2 h-4 w-4 text-blue-600">
                   {{ type }}
                 </label>
@@ -102,7 +94,7 @@
 
                   <div class="mt-2">
                     <label class="text-xs text-gray-700">Document Description</label>
-                    <input type="text" [(ngModel)]="doc.description" [name]="'docDescription' + i"
+                    <input type="text" [(ngModel)]="doc.description" [ngModelOptions]="{standalone: true}"
                       class="w-full mt-1 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                   </div>
                 </div>
@@ -129,7 +121,7 @@
             Cancel
           </button>
           <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            [disabled]="!project.name">
+            [disabled]="projectForm.invalid">
             Create Project
           </button>
         </div>

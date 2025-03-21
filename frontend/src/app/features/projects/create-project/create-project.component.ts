@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
+import { ProjectServiceV2 } from '../../../services/project-service-v2';
 
 interface Document {
   id: number;
@@ -16,11 +17,15 @@ interface Document {
 @Component({
   selector: 'app-create-project',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './create-project.component.html',
   styleUrls: ['./create-project.component.scss']
 })
 export class CreateProjectComponent {
+
+  isSubmitting: boolean = false;
+  projectForm!: FormGroup;
+
   project = {
     name: '',
     description: '',
@@ -35,11 +40,21 @@ export class CreateProjectComponent {
   documentTypes = ['PDF', 'DOCX', 'XLS', 'PPT', 'TXT', 'CSV', 'ZIP', 'Other'];
   accessTypes = ['Private', 'Restricted', 'Public'];
 
-  constructor(private router: Router, private route: ActivatedRoute) {}
+  constructor(private fb: FormBuilder, private router: Router, private route: ActivatedRoute, private projectService: ProjectServiceV2) { }
 
-  ngOnInit(){
+  ngOnInit() {
+    this.initForm();
+
     this.route.paramMap.subscribe(params => {
       this.pageTitle = params.has('id') ? 'Edit Project' : 'Create New Project';
+    });
+  }
+
+  initForm(): void {
+    this.projectForm = this.fb.group({
+      name: ['', Validators.required],
+      description: [''],
+      accessType: ['private'],
     });
   }
 
@@ -65,7 +80,7 @@ export class CreateProjectComponent {
     if (!input.files) return;
 
     const files = Array.from(input.files);
-    
+
     if (files.length > this.maxDocumentsPerUpload) {
       alert(`You can only upload ${this.maxDocumentsPerUpload} documents at a time.`);
       return;
@@ -98,22 +113,50 @@ export class CreateProjectComponent {
   }
 
   formatFileSize(bytes: number): string {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / 1048576).toFixed(1) + ' MB';
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
   createProject(): void {
-    // Here you would implement the actual project creation logic
-    // For example, sending the form data and files to your backend API
-    console.log('Creating project:', this.project);
-    console.log('With documents:', this.documents);
-    
-    // Navigate back to dashboard after successful creation
-    this.router.navigate(['/admin']);
+    if (this.projectForm.valid) {
+
+      // Prepare project data
+      const projectData = {
+        name: this.project.name,
+        description: this.project.description || '',
+        access_type: this.project.accessType,
+        state: 'DRAFT'
+      };
+
+      // Prepare files
+      const files = this.documents.map(doc => doc.file);
+
+      // Set isSubmitting flag
+      this.isSubmitting = true;
+
+      // Use the service to create the project
+      this.projectService.createProject(projectData, files).subscribe({
+        next: (response: any) => {
+          console.log('Project created successfully:', response);
+          this.router.navigate(['/admin-dashboard']);
+        },
+        error: (error: any) => {
+          console.error('Error creating project:', error);
+          this.isSubmitting = false;
+        },
+        complete: () => {
+          this.isSubmitting = false;
+        }
+      });
+    } else {
+      return;
+    }
   }
 
   cancel(): void {
-    this.router.navigate(['/admin']);
+    this.router.navigate(['/admin-dashboard']);
   }
 }

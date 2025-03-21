@@ -7,5 +7,12 @@ export interface Project {
     createdAt: Date;
     updatedAt: Date;
     accessType?: string;
+    state: ProjectState; 
     documents: AttachedDocument[];
   }
+
+export enum ProjectState {
+  DRAFT = 'DRAFT',
+  PUBLISHED = 'PUBLISHED',
+  ARCHIVED = 'ARCHIVED',
+}
