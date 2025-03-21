@@ -7,14 +7,14 @@ import { LlmService } from '../../../services/llm.service';
 import { MessageService } from '../../../services/message.service';
 import { ProjectService } from '../../../services/project.services';
 import { HeaderComponent } from '../../../components/header/header.component';
-import { NgFor, NgIf, AsyncPipe } from '@angular/common';
+import { NgFor, NgIf, AsyncPipe, DatePipe } from '@angular/common';
 import { InputFieldComponent } from '../../../components/input-field/input-field.component';
 import { MessageBubbleComponent } from '../../../components/message-bubble/message-bubble.component';
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [NgFor, NgIf, AsyncPipe,HeaderComponent, InputFieldComponent, MessageBubbleComponent],
+  imports: [NgFor, NgIf, AsyncPipe, DatePipe, HeaderComponent, InputFieldComponent, MessageBubbleComponent],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
 })
@@ -22,8 +22,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
   
   messages = this.messageService.messages;
+  messageGroups = this.messageService.messageGroups;
   currentProject: Project | undefined;
-  recentUserMessages: Message[] = [];
   isLoading = false;
   faqs!: Observable<{question: string, answer: string}[]>;
   
@@ -36,28 +36,22 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     private messageService: MessageService,
     private projectService: ProjectService,
     private llmService: LlmService
-  ) {
-    console.log('Chat component constructor')
-  }
+  ) {}
   
   ngOnInit(): void {
-    console.log('Chat component init')
     this.subscriptions.push(
       this.route.paramMap.subscribe(params => {
         const id = params.get('id');
         if (id) {
-          console.log('Chat component init with id:', id)
           this.projectId = id;
           this.loadProject();
         } else {
-          console.log('Chat component init without id')
           this.router.navigate(['/projects']);
         }
       })
     );
     
     this.faqs = this.llmService.getFAQs();
-    this.loadRecentMessages();
   }
   
   ngAfterViewChecked(): void {
@@ -70,20 +64,9 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   
   private loadProject(): void {
     this.currentProject = this.projectService.getProject(this.projectId);
-    // if (!this.currentProject) {
-    //   this.router.navigate(['/projects']);
-    //   return;
-    // }
     
+    // Load messages for this project
     this.messageService.loadMessagesForProject(this.projectId);
-  }
-  
-  private loadRecentMessages(): void {
-    // Get only user messages for the sidebar
-    const messages = this.messageService.getRecentMessages()
-      .filter(message => message.role === 'user');
-    
-    this.recentUserMessages = messages;
   }
   
   sendMessage(content: string): void {
@@ -99,7 +82,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
         next: (response) => {
           this.messageService.addAssistantMessage(response);
           this.isLoading = false;
-          this.loadRecentMessages(); // Refresh recent messages
         },
         error: (error) => {
           console.error('Error getting response:', error);
@@ -115,11 +97,15 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
   
   jumpToMessage(message: Message): void {
-    // This is a simplified implementation
-    // In a real app, you might want to scroll to the actual message
-    // or implement a search functionality
-    // For now, we'll just add the message to the input
-    this.sendMessage(message.content);
+    // Show the message content in the input field
+    const inputField = document.querySelector('app-input-field textarea') as HTMLTextAreaElement;
+    if (inputField) {
+      inputField.value = message.content;
+      inputField.focus();
+    }
+    
+    // Alternatively, you could implement a "search" function to find and highlight 
+    // this message in the conversation history
   }
   
   navigateToProjects(): void {

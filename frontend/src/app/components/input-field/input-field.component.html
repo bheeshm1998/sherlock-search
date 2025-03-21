@@ -1,18 +1,23 @@
-<div class="flex items-end border rounded-lg bg-white shadow-sm">
-    <textarea
-      [(ngModel)]="message"
-      (keydown.enter)="onEnterPress($event)"
-      rows="1"
-      class="flex-grow p-4 border-0 focus:ring-0 focus:outline-none resize-none rounded-tl-lg rounded-bl-lg"
-      placeholder="Enter your query here..."
-    ></textarea>
-    <button
-      (click)="sendMessage()"
-      [disabled]="!message.trim()"
-      class="p-4 text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 rounded-tr-lg rounded-br-lg"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-      </svg>
-    </button>
-  </div>
+<div class="relative">
+  <textarea
+    #messageInput
+    [(ngModel)]="message"
+    (keydown.enter)="handleEnter($event)"
+    class="w-full border border-gray-300 rounded-lg py-3 px-4 pr-16 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+    placeholder="Type your message..."
+    rows="3"
+  ></textarea>
+  <button
+    (click)="sendMessage()"
+    [disabled]="isLoading || !message.trim()"
+    class="absolute right-2 bottom-2 p-2 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-indigo-300 disabled:cursor-not-allowed transition-colors"
+  >
+    <svg *ngIf="!isLoading" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+    </svg>
+    <svg *ngIf="isLoading" class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+  </button>
+</div>
