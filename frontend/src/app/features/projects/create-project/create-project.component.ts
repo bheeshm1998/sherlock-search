@@ -4,15 +4,7 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { ProjectServiceV2 } from '../../../services/project-service-v2';
-
-interface Document {
-  id: number;
-  name: string;
-  type: string;
-  description: string;
-  size: number;
-  file: File;
-}
+import { AttachedDocument } from '../../../models/document.model';
 
 @Component({
   selector: 'app-create-project',
@@ -26,20 +18,32 @@ export class CreateProjectComponent {
   isSubmitting: boolean = false;
   projectForm!: FormGroup;
 
-  documents: Document[] = [];
+  documents: AttachedDocument[] = [];
   pageTitle = 'Create Project';
   maxDocumentsPerUpload = 5;
   maxTotalDocuments = 20;
   documentTypes = ['PDF', 'DOCX', 'XLS', 'PPT', 'TXT', 'CSV', 'ZIP', 'Other'];
   accessTypes = ['Private', 'Restricted', 'Public'];
+  submitBtnText = 'Create Project';
 
-  constructor(private fb: FormBuilder, private router: Router, private route: ActivatedRoute, private projectService: ProjectServiceV2) { }
+  projectId: string | null = null;
+
+  constructor(
+    private fb: FormBuilder, 
+    private router: Router, 
+    private route: ActivatedRoute, 
+    private projectService: ProjectServiceV2) { }
 
   ngOnInit() {
     this.initForm();
 
     this.route.paramMap.subscribe(params => {
-      this.pageTitle = params.has('id') ? 'Edit Project' : 'Create New Project';
+      this.projectId = params.get('id');
+      if (this.projectId) {
+        this.pageTitle = 'Edit Project';
+        this.submitBtnText = 'Save Changes';
+        this.loadProjectData(this.projectId);
+      }
     });
   }
 
@@ -48,6 +52,17 @@ export class CreateProjectComponent {
       name: ['', Validators.required],
       description: [''],
       accessType: ['private'],
+    });
+  }
+
+  loadProjectData(id: string): void {
+    this.projectService.getProjectById(id).subscribe(project => {
+      this.projectForm.patchValue({
+        name: project.name,
+        description: project.description,
+        accessType: project.accessType,
+      });
+      this.documents = project.documents || [];
     });
   }
 
@@ -86,10 +101,10 @@ export class CreateProjectComponent {
 
     files.forEach(file => {
       const fileType = this.getFileExtension(file.name);
-      const newDoc: Document = {
-        id: Date.now() + Math.floor(Math.random() * 1000),
+      const newDoc: AttachedDocument = {
         name: file.name,
-        type: fileType,
+        documentType: fileType,
+        uploadedAt: new Date(),
         description: file.name, // Default description is the file name
         size: file.size,
         file: file
@@ -113,10 +128,8 @@ export class CreateProjectComponent {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
-  createProject(): void {
+  createOrUpdateProject(): void {
     if (this.projectForm.valid) {
-
-      // Prepare project data
       const projectData = {
         name: this.projectForm.get('name')?.value,
         description: this.projectForm.get('description')?.value,
@@ -124,28 +137,34 @@ export class CreateProjectComponent {
         state: 'DRAFT'
       };
 
-      // Prepare files
-      const files = this.documents.map(doc => doc.file);
-
-      // Set isSubmitting flag
+      const files = this.documents.map(doc => doc.file).filter(Boolean);
       this.isSubmitting = true;
 
-      // Use the service to create the project
-      this.projectService.createProject(projectData, files).subscribe({
-        next: (response: any) => {
-          console.log('Project created successfully:', response);
-          this.router.navigate(['/admin-dashboard']);
-        },
-        error: (error: any) => {
-          console.error('Error creating project:', error);
-          this.isSubmitting = false;
-        },
-        complete: () => {
-          this.isSubmitting = false;
-        }
-      });
-    } else {
-      return;
+      if (this.projectId) {
+        this.projectService.updateProject(this.projectId, projectData, files).subscribe({
+          next: response => {
+            console.log('Project updated successfully:', response);
+            this.router.navigate(['/admin-dashboard']);
+          },
+          error: error => {
+            console.error('Error updating project:', error);
+            this.isSubmitting = false;
+          },
+          complete: () => (this.isSubmitting = false)
+        });
+      } else {
+        this.projectService.createProject(projectData, files).subscribe({
+          next: response => {
+            console.log('Project created successfully:', response);
+            this.router.navigate(['/admin-dashboard']);
+          },
+          error: error => {
+            console.error('Error creating project:', error);
+            this.isSubmitting = false;
+          },
+          complete: () => (this.isSubmitting = false)
+        });
+      }
     }
   }
 

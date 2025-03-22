@@ -45,3 +45,12 @@ class ProjectResponse(BaseModel):
 
     class Config:
         from_attributes = True  # Enable ORM mode (previously `orm_mode`)
+
+
+# Model for creating a new project
+class ProjectAbstractData(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
+    access_type: Optional[str] = None
+    state: Optional[str] = "DRAFT"  # Default state is DRAFT

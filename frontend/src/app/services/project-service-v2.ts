@@ -30,8 +30,17 @@ export class ProjectServiceV2 {
     return this.http.post<any>(`${this.apiUrl}/projectsv2`, formData);
   }
 
-  updateProject(id: string, updates: Partial<Project>): Observable<Project> {
-    return this.http.put<Project>(`${this.apiUrl}/${id}`, updates);
+  updateProject(id: string, projectData: any, files: File[]): Observable<Project> {
+    const formData = new FormData();
+    
+    // Append project data as JSON string
+    formData.append('project_data', JSON.stringify(projectData));
+    
+    // Append files
+    files.forEach(file => {
+      formData.append('files', file, file.name);
+    });
+    return this.http.put<any>(`${this.apiUrl}/${id}`, formData);
   }
 
   deleteProject(id: string): Observable<{ message: string }> {
