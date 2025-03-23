@@ -34,7 +34,9 @@ class ProjectService:
                     name=project.name,
                     description=project.description,
                     access_type=project.access_type,
-                    state=project.state
+                    state=project.state,
+                    num_documents=len(project.documents),
+                    updated_at=project.updated_at
                 )
                 for project in projects
             ]
@@ -46,21 +48,22 @@ class ProjectService:
         """
         Updates the project's state to 'published' in the database.
         """
+        db: Session = next(get_db())
         # Fetch project by ID
-        project = Project.query.filter_by(id=project_id).first()
+        project = db.query(Project).filter_by(id=project_id).first()
 
         if not project:
             raise ValueError(f"Project with ID {project_id} not found.")
 
         # Update project state
-        project.state = 'published'
+        project.state = 'PUBLISHED'
+        project.updated_at = datetime.now()
 
         # Commit changes to the database
-        db: Session = next(get_db())
         try:
-            db.session.commit()
+            db.commit()
         except Exception as e:
-            db.session.rollback()
+            db.rollback()
             raise ValueError(f"Failed to update project state: {str(e)}")
 
         return ProjectAbstractData(
@@ -68,7 +71,9 @@ class ProjectService:
                     name=project.name,
                     description=project.description,
                     access_type=project.access_type,
-                    state=project.state
+                    state=project.state,
+                    num_documents=len(project.documents),
+                    updated_at=project.updated_at
                 )
 
     @staticmethod
