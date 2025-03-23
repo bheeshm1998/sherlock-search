@@ -2,6 +2,7 @@ import os
 import tempfile
 
 import pdfplumber
+from fastapi import HTTPException
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sqlalchemy.orm import Session
 from uuid import uuid4
@@ -12,21 +13,75 @@ from app.config.pinecone_init import pc
 from app.database import get_db
 from app.models.project import Project, Document
 from app.routes.document_routes import get_gemini_embedding
-from app.schemas.project import ProjectCreate, ProjectResponse
+from app.schemas.project import ProjectCreate, ProjectResponse, ProjectAbstractData
 from app.utils.s3 import upload_to_s3
 
 
 class ProjectService:
 
     @staticmethod
-    def get_all_projects() -> List[ProjectResponse]:
+    def get_all_projects() -> List[ProjectAbstractData]:
         """
-        Fetch all projects from the database.
+        Fetch all projects from the database and return them as ProjectAbstractData.
         """
         db: Session = next(get_db())
-        projects = db.query(Project).all()
-        db.close()
-        return [ProjectResponse.model_validate(project) for project in projects]
+        try:
+            projects = db.query(Project).all()  # Retrieve all projects from the database
+            # Transform each Project into ProjectAbstractData
+            return [
+                ProjectAbstractData(
+                    id=project.id,
+                    name=project.name,
+                    description=project.description,
+                    access_type=project.access_type,
+                    state=project.state
+                )
+                for project in projects
+            ]
+        finally:
+            db.close()
+
+    @staticmethod
+    def publish_project(project_id):
+        """
+        Updates the project's state to 'published' in the database.
+        """
+        # Fetch project by ID
+        project = Project.query.filter_by(id=project_id).first()
+
+        if not project:
+            raise ValueError(f"Project with ID {project_id} not found.")
+
+        # Update project state
+        project.state = 'published'
+
+        # Commit changes to the database
+        db: Session = next(get_db())
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise ValueError(f"Failed to update project state: {str(e)}")
+
+        return ProjectAbstractData(
+                    id=project.id,
+                    name=project.name,
+                    description=project.description,
+                    access_type=project.access_type,
+                    state=project.state
+                )
+
+    @staticmethod
+    def getProjectById(project_id: str) -> Project:
+        db: Session = next(get_db())
+        project = db.query(Project).filter(Project.id == project_id).first()
+
+        # If project not found, raise an HTTP 404 exception
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+
+        # Return the project details
+        return project
 
     @staticmethod
     def create_project(project_data: ProjectCreate) -> ProjectResponse:

@@ -2,16 +2,9 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { ProjectState } from '../../../models/project.model';
+import { ProjectServiceV2 } from '../../../services/project-service-v2';
 
-interface Project {
-  id: number;
-  name: string;
-  description: string;
-  documentType: string;
-  accessType: string;
-  documentsCount: number;
-  createdAt: Date;
-}
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -21,44 +14,48 @@ interface Project {
   styleUrls: ['./admin-dashboard.component.scss']
 })
 export class AdminDashboardComponent {
-  projects: Project[] = [
-    {
-      id: 1,
-      name: 'Financial Reports 2023',
-      description: 'Annual financial reporting documents',
-      documentType: 'PDF',
-      accessType: 'Restricted',
-      documentsCount: 12,
-      createdAt: new Date('2023-12-15')
-    },
-    {
-      id: 2,
-      name: 'Marketing Materials',
-      description: 'Brochures and promotional content',
-      documentType: 'Various',
-      accessType: 'Public',
-      documentsCount: 8,
-      createdAt: new Date('2024-01-20')
-    },
-    {
-      id: 3,
-      name: 'Legal Contracts',
-      description: 'Client agreements and legal documents',
-      documentType: 'DOCX',
-      accessType: 'Private',
-      documentsCount: 15,
-      createdAt: new Date('2024-02-10')
-    }
-  ];
 
-  constructor(private router: Router) {}
+  ProjectState: any = ProjectState;
+  projects: any[] = [];
+  constructor(private router: Router, private projectService: ProjectServiceV2) { }
+
+  ngOnInit(): void {
+    this.getAllProjects();
+  }
+
+  getAllProjects(): void {
+    this.projectService.getAllProjects()
+      .subscribe({
+        next: (data) => {
+          this.projects = data;
+        },
+        error: (err) => {
+          console.error('Error fetching projects:', err);
+        }
+      });
+  }
 
   navigateToCreateProject(): void {
     this.router.navigate(['/create-project']);
   }
 
-  openProject(id: number): void {
+  openProject(id: number | string): void {
     // Navigate to project details page
     this.router.navigate(['/project-details', id]);
   }
+
+  publishProject(projectId: string | number) {
+    this.projectService.publishProject(projectId)
+    .subscribe({
+      next: () => {
+        this.projects = this.projects.map(project =>
+          project.id === projectId ? { ...project, state: 'PUBLISHED' } : project
+        );
+      },
+      error: (err) => {
+        console.error('Error publishing project:', err);
+      }
+    });
+  }
+
 }

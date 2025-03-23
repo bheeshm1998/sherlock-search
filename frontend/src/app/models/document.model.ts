@@ -1,9 +1,10 @@
 export interface AttachedDocument {
-    id: string;
+    id?: string;
     name: string;
     description?: string;
     uploadedAt: Date;
     documentType: string;
     fileExtension?: string;
-    size: string
+    size: number;
+    file: File ;
   }

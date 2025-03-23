@@ -1,7 +1,7 @@
 import { AttachedDocument } from "./document.model";
 
 export interface Project {
-    id: string;
+    id: string | number;
     name: string;
     description?: string;
     createdAt: Date;

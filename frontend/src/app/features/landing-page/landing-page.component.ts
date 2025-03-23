@@ -11,11 +11,16 @@ import { Router } from '@angular/router';
 })
 export class LandingPageComponent {
   userType: 'enduser' | 'admin' = 'admin';
+  githubUrl = 'https://github.com/bheeshm1998/sherlock-search';
   
   constructor(private router: Router) {}
 
   setUserType(type: 'enduser' | 'admin'): void {
     this.userType = type;
+  }
+
+  openGithub() {
+    window.open(this.githubUrl, '_blank');
   }
 
   handleGoogleAuth(): void {

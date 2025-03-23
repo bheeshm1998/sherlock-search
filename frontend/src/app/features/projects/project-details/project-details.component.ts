@@ -21,33 +21,6 @@ export class ProjectDetailsComponent {
     accessType: "private",
     state: ProjectState.DRAFT,
     documents: [
-      {
-        id: "doc-67890",
-        name: "Design Mockups",
-        description: "Initial design mockups for the homepage.",
-        uploadedAt: new Date("2023-10-02T10:15:00Z"),
-        documentType: "Design",
-        fileExtension: ".pdf",
-        size: "2.5MB",
-      },
-      {
-        id: "doc-67891",
-        name: "Project Scope",
-        description: "Detailed project scope and deliverables.",
-        uploadedAt: new Date("2023-10-03T11:00:00Z"),
-        documentType: "Planning",
-        fileExtension: ".docx",
-        size: "1.2MB",
-      },
-      {
-        id: "doc-67892",
-        name: "User Research Findings",
-        description: "Description for user research findings.",
-        uploadedAt: new Date("2023-10-05T12:45:00Z"),
-        documentType: "Research",
-        fileExtension: ".pptx",
-        size: "3.0MB",
-      },
     ],
   };;
 

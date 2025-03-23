@@ -3,12 +3,12 @@ import json
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from typing import List, Optional
 
-from app.schemas.project import ProjectCreate, ProjectResponse, DocumentCreate
+from app.schemas.project import ProjectCreate, ProjectResponse, DocumentCreate, ProjectAbstractData
 from app.services.project_service import ProjectService
 
 router = APIRouter()
 
-@router.get("/projects", response_model=List[ProjectResponse])
+@router.get("/projects", response_model=List[ProjectAbstractData])
 async def get_projects():
     """
     Get all projects.
@@ -92,3 +92,28 @@ async def delete_project(project_id: str):
     if not success:
         raise HTTPException(status_code=404, detail="Project not found")
     return {"message": f"Project '{project_id}' deleted successfully."}
+
+
+@router.get("/projects/{project_id}", response_model=ProjectResponse)
+def get_project_by_id(project_id: str):
+    """
+    Get details for a project by its ID.
+    """
+    # Query the project from the database
+    project = ProjectService.getProjectById(project_id)
+
+    return project
+
+@router.put("/projects/{project_id}/publish", response_model=ProjectResponse)
+async def publish_project(project_id: int):
+    """
+    Publish an existing project by updating its state to 'published'.
+    """
+    try:
+        # Call the ProjectService method to update the project state
+        project = ProjectService.publish_project(project_id)
+        return project
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
