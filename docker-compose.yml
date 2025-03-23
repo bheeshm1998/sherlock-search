@@ -12,6 +12,16 @@ services:
       - "5432:5432"  # Map Postgres port to host
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
+  web:
+      build: .
+      command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
+      volumes:
+        - .:/app
+      ports:
+        - "8000:80"
+      depends_on:
+        - db
+      environment:
+        DATABASE_URL: postgresql://abhishek:abhishek@db:5432/abhishek
 volumes:
   postgres_data:

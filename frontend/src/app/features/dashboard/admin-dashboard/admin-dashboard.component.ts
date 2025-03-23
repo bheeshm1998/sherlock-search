@@ -4,12 +4,14 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ProjectState } from '../../../models/project.model';
 import { ProjectServiceV2 } from '../../../services/project-service-v2';
+import { HeaderComponent } from "../../../components/header/header.component";
+import { FooterComponent } from '../../../components/footer/footer.component';
 
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, HeaderComponent, FooterComponent],
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.scss']
 })
