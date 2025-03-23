@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -31,9 +33,17 @@ app.include_router(whatsapp_routes.router, prefix="/whatsapp")
 # from app.plugins.oauth_auth import app as oauth_auth_app
 # app.mount("/oauth", oauth_auth_app)
 
+logging.basicConfig(
+    level=logging.DEBUG,  # Set the logging level to DEBUG
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",  # Log format
+    handlers=[logging.StreamHandler()],  # Log to the console
+)
+
+logger = logging.getLogger(__name__)
 
 @app.get("/app")
 async def root():
+    logger.debug("Root endpoint accessed")
     return {"message": "Enterprise Search Backend"}
 
 

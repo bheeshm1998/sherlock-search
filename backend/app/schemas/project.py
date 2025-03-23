@@ -55,3 +55,4 @@ class ProjectAbstractData(BaseModel):
     access_type: Optional[str] = None
     state: Optional[str] = "DRAFT"  # Default state is DRAFT
     num_documents: int
+    updated_at: datetime
