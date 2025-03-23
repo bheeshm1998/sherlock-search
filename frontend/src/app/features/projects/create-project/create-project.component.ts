@@ -5,11 +5,13 @@ import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { ProjectServiceV2 } from '../../../services/project-service-v2';
 import { AttachedDocument } from '../../../models/document.model';
+import { HeaderComponent } from "../../../components/header/header.component";
+import { FooterComponent } from "../../../components/footer/footer.component";
 
 @Component({
   selector: 'app-create-project',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, HeaderComponent, FooterComponent],
   templateUrl: './create-project.component.html',
   styleUrls: ['./create-project.component.scss']
 })

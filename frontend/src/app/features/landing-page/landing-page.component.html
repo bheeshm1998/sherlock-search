@@ -67,7 +67,7 @@
             <button
               class="inline-flex items-center justify-center whitespace-nowrap px-4 py-2 text-sm font-medium border border-gray-400 rounded shadow transition-all duration-200"
               [ngClass]="{
-                  'bg-teal-800 text-gray-100 hover:bg-teal-900 hover:text-white': userType === 'enduser',
+                  'bg-slate-800 text-gray-100 hover:bg-slate-900 hover:text-white': userType === 'enduser',
                   'bg-white text-gray-800 hover:bg-gray-100': userType !== 'enduser'
                 }" (click)="setUserType('enduser')">
               Employee
@@ -76,7 +76,7 @@
             <button
               class="inline-flex items-center justify-center whitespace-nowrap px-4 py-2 text-sm font-medium border border-gray-400 rounded shadow transition-all duration-200"
               [ngClass]="{
-                  'bg-teal-800 text-gray-100 hover:bg-teal-900 hover:text-white': userType === 'admin',
+                  'bg-slate-800 text-gray-100 hover:bg-slate-900 hover:text-white': userType === 'admin',
                   'bg-white text-gray-800 hover:bg-gray-100': userType !== 'admin'
                 }" (click)="setUserType('admin')">
               Administrator
