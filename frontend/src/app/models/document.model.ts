@@ -6,5 +6,5 @@ export interface AttachedDocument {
     documentType: string;
     fileExtension?: string;
     size: number;
-    file: File;
+    file: File ;
   }

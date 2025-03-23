@@ -11,7 +11,7 @@ export class ProjectServiceV2 {
   private apiUrl = `${environment.apiBaseUrl}`;
   private http = inject(HttpClient);
 
-  getProjects(): Observable<Project[]> {
+  getAllProjects(): Observable<Project[]> {
     return this.http.get<Project[]>(this.apiUrl);
   }
 
@@ -49,5 +49,10 @@ export class ProjectServiceV2 {
 
   getProjectById(id: string): Observable<Project> {
     return this.http.get<Project>(`${this.apiUrl}/${id}`);
+  }
+
+  publishProject(id: string | number): Observable<Project> {
+
+    return this.http.put<Project>(`${this.apiUrl}/${id}/publish`, {});
   }
 }

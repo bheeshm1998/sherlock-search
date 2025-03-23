@@ -103,3 +103,17 @@ def get_project_by_id(project_id: str):
     project = ProjectService.getProjectById(project_id)
 
     return project
+
+@router.put("/projects/{project_id}/publish", response_model=ProjectResponse)
+async def publish_project(project_id: int):
+    """
+    Publish an existing project by updating its state to 'published'.
+    """
+    try:
+        # Call the ProjectService method to update the project state
+        project = ProjectService.publish_project(project_id)
+        return project
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")

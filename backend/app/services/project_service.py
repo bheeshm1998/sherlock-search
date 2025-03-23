@@ -42,6 +42,36 @@ class ProjectService:
             db.close()
 
     @staticmethod
+    def publish_project(project_id):
+        """
+        Updates the project's state to 'published' in the database.
+        """
+        # Fetch project by ID
+        project = Project.query.filter_by(id=project_id).first()
+
+        if not project:
+            raise ValueError(f"Project with ID {project_id} not found.")
+
+        # Update project state
+        project.state = 'published'
+
+        # Commit changes to the database
+        db: Session = next(get_db())
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise ValueError(f"Failed to update project state: {str(e)}")
+
+        return ProjectAbstractData(
+                    id=project.id,
+                    name=project.name,
+                    description=project.description,
+                    access_type=project.access_type,
+                    state=project.state
+                )
+
+    @staticmethod
     def getProjectById(project_id: str) -> Project:
         db: Session = next(get_db())
         project = db.query(Project).filter(Project.id == project_id).first()
