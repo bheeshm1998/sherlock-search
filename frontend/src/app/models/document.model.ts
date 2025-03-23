@@ -4,7 +4,7 @@ export interface AttachedDocument {
     description?: string;
     uploadedAt: Date;
     documentType: string;
-    fileExtension?: string;
+    fileExtension: string;
     size: number;
-    file: File ;
+    file: any ;
   }

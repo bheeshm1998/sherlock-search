@@ -15,31 +15,37 @@ export class ProjectServiceV2 {
     return this.http.get<Project[]>(`${this.apiUrl}/projects`);
   }
 
-  createProject(projectData: any, files: File[]): Observable<any> {
+  createProject(projectData: any, files: File[] | null): Observable<any> {
     const formData = new FormData();
     
     // Append project data as JSON string
     formData.append('project_data', JSON.stringify(projectData));
     
     // Append files
-    files.forEach(file => {
-      formData.append('files', file, file.name);
-    });
+    if(files) {
+      files.forEach(file => {
+        formData.append('files', file, file.name);
+      });
+    }
+
 
     // Make the HTTP POST request
     return this.http.post<any>(`${this.apiUrl}/projectsv2`, formData);
   }
 
-  updateProject(id: string, projectData: any, files: File[]): Observable<Project> {
+  updateProject(id: string, projectData: any, files: File[] | null): Observable<Project> {
     const formData = new FormData();
     
     // Append project data as JSON string
     formData.append('project_data', JSON.stringify(projectData));
     
     // Append files
-    files.forEach(file => {
-      formData.append('files', file, file.name);
-    });
+    if(files) {
+      files.forEach(file => {
+        formData.append('files', file, file.name);
+      });
+    }
+    
     return this.http.put<any>(`${this.apiUrl}/projects/${id}`, formData);
   }
 

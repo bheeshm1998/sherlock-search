@@ -68,7 +68,7 @@
               maxTotalDocuments }} files per project</p>
             <input type="file" id="fileUpload" multiple class="hidden" (change)="onFileSelected($event)"
               [disabled]="documents.length >= maxTotalDocuments">
-            <label for="fileUpload" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg cursor-pointer"
+            <label for="fileUpload" class="bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium px-4 py-2 rounded-md cursor-pointer"
               [class.opacity-50]="documents.length >= maxTotalDocuments"
               [class.cursor-not-allowed]="documents.length >= maxTotalDocuments">
               Browse Files
@@ -116,11 +116,11 @@
 
         <!-- Form Actions -->
         <div class="flex justify-end space-x-4">
-          <button type="button" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+          <button type="button" class="px-4 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
             (click)="cancel()">
             Cancel
           </button>
-          <button type="submit" class="px-4 py-2 bg-teal-800 text-gray-100 disabled:pointer-events-none disabled:bg-gray-200 disabled:text-gray-800 rounded-md text-sm font-medium hover:bg-teal-900 hover:text-white hover:cursor-pointer"
+          <button type="submit" class="px-4 py-1 bg-teal-800 text-gray-100 disabled:pointer-events-none disabled:bg-gray-200 disabled:text-gray-800 rounded-md text-sm font-medium hover:bg-teal-900 hover:text-white hover:cursor-pointer"
             [disabled]="projectForm.invalid">
             {{submitBtnText}}
           </button>

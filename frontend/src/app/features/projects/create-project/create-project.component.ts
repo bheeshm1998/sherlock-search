@@ -109,7 +109,8 @@ export class CreateProjectComponent {
         uploadedAt: new Date(),
         description: file.name, // Default description is the file name
         size: file.size,
-        file: file
+        file: file,
+        fileExtension: fileType
       };
       this.documents.push(newDoc);
     });
