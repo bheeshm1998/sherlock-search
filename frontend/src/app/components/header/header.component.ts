@@ -10,4 +10,11 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 })
 export class HeaderComponent {
 
+  githubUrl = 'https://github.com/bheeshm1998/sherlock-search';
+
+  
+  openGithub() {
+    window.open(this.githubUrl, '_blank');
+  }
+
 }
