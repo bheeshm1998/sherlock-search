@@ -1,82 +1,83 @@
-
 <div class="min-h-screen flex flex-col">
-<app-header></app-header>
-<div class="bg-gradient-to-b from-blue-50 to-indigo-100 p-6 flex-1">
-  
+  <app-header></app-header>
+  <div class="bg-gradient-to-b from-blue-50 to-indigo-100 p-6 flex-1">
+
     <div class="max-w-7xl mx-auto">
       <div class="flex justify-between items-center mb-8">
         <div>
           <h1 class="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
           <p class="text-gray-600">Manage your document projects</p>
         </div>
-        <button 
-          (click)="navigateToCreateProject()" *ngIf="projects.length == 0" 
+        <button (click)="navigateToCreateProject()" *ngIf="projects.length != 0"
           class="mt-4 flex items-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 bg-teal-800 text-gray-100 border border-gray-300 shadow hover:bg-teal-900 hover:text-white">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
           New Project
         </button>
       </div>
-  
+
       <!-- Projects Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @for (project of projects; track project.id) {
-          <div 
-            class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden cursor-pointer"
-            (click)="openProject(project.id)">
-            <div class="p-6">
-              <h2 class="text-xl font-semibold text-gray-800 mb-2">{{ project.name }}</h2>
-              <p class="text-gray-600 mb-4">{{ project.description }}</p>
-              
-              <div class="flex justify-between text-sm text-gray-500 mb-3">
-                <span>Access: {{ project.accessType }}</span>
-              </div>
-              
-              <div class="flex justify-between items-center mb-3">
-                <span class="text-sm text-blue-600">{{ project.documents.length }} documents</span>
-                <span class="text-xs text-gray-500">Created: {{ project.createdAt | date:'mediumDate' }}</span>
-              </div>
+        <div
+          class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden cursor-pointer"
+          (click)="openProject(project.id)">
+          <div class="p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">{{ project.name }}</h2>
+            <p class="text-gray-600 mb-4">{{ project.description }}</p>
 
-               <!-- Project State Button -->
-        <div class="flex justify-end">
-          @if (project.state === ProjectState.Published) {
-            <button class="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-              Published
-            </button>
-          } @else {
-            <button 
-              (click)="publishProject(project.id)" 
-              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-              Publish
-            </button>
-          }
-        </div>
-
-
+            <div class="flex justify-between text-sm text-gray-500 mb-3">
+              <span>Access: {{ project.accessType }}</span>
             </div>
-          </div>
-        } @empty {
-          <div class="col-span-full flex justify-center items-center p-12">
-            <div class="text-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="#001d3d">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <h3 class="mt-4 text-lg font-medium text-gray-900">No projects found</h3>
-              <p class="mt-1 text-gray-500">Get started by creating a new project</p>
-              <button 
-                (click)="navigateToCreateProject()" 
-                class="mt-4 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 bg-teal-800 text-gray-100 border border-gray-300 shadow hover:bg-teal-900 hover:text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+
+            <div class="flex justify-between items-center mb-3">
+              <span class="text-sm text-blue-600">{{ project.num_documents.length }} documents</span>
+              <span class="text-xs text-gray-500">Created: {{ project.createdAt | date:'mediumDate' }}</span>
+            </div>
+
+            <!-- Project State Button -->
+            <div class="flex justify-end">
+              @if (project.state === ProjectState.Published) {
+              <button class="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
-                Create Project
+                Published
               </button>
+              } @else {
+              <button (click)="publishProject(project.id)"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                Publish
+              </button>
+              }
             </div>
+
+
           </div>
+        </div>
+        } @empty {
+        <div class="col-span-full flex justify-center items-center p-12">
+          <div class="text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none"
+              viewBox="0 0 24 24" stroke="#001d3d">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <h3 class="mt-4 text-lg font-medium text-gray-900">No projects found</h3>
+            <p class="mt-1 text-gray-500">Get started by creating a new project</p>
+            <button (click)="navigateToCreateProject()"
+              class="mt-4 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 bg-teal-800 text-gray-100 border border-gray-300 shadow hover:bg-teal-900 hover:text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Create Project
+            </button>
+          </div>
+        </div>
         }
       </div>
     </div>

@@ -34,7 +34,8 @@ class ProjectService:
                     name=project.name,
                     description=project.description,
                     access_type=project.access_type,
-                    state=project.state
+                    state=project.state,
+                    num_documents=len(project.documents)
                 )
                 for project in projects
             ]

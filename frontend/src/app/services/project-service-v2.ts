@@ -12,7 +12,7 @@ export class ProjectServiceV2 {
   private http = inject(HttpClient);
 
   getAllProjects(): Observable<Project[]> {
-    return this.http.get<Project[]>(this.apiUrl);
+    return this.http.get<Project[]>(`${this.apiUrl}/projects`);
   }
 
   createProject(projectData: any, files: File[]): Observable<any> {
@@ -40,11 +40,11 @@ export class ProjectServiceV2 {
     files.forEach(file => {
       formData.append('files', file, file.name);
     });
-    return this.http.put<any>(`${this.apiUrl}/${id}`, formData);
+    return this.http.put<any>(`${this.apiUrl}/projects/${id}`, formData);
   }
 
   deleteProject(id: string): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/projects/${id}`);
   }
 
   getProjectById(id: string): Observable<Project> {
@@ -53,6 +53,6 @@ export class ProjectServiceV2 {
 
   publishProject(id: string | number): Observable<Project> {
 
-    return this.http.put<Project>(`${this.apiUrl}/${id}/publish`, {});
+    return this.http.put<Project>(`${this.apiUrl}/projects/${id}/publish`, {});
   }
 }
