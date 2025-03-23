@@ -1,9 +1,10 @@
 
 <div class="h-screen flex flex-col">
+  <app-header></app-header>
   <div class="flex-1 overflow-hidden">
     <div class="h-full flex">
       <!-- Sidebar -->
-      <div class="w-64 bg-gray-50 border-r border-gray-200 flex flex-col">
+      <div class="w-96 bg-gray-50 border-r border-gray-200 flex flex-col">
         <div class="p-4 border-b border-gray-200">
           <h2 class="text-lg font-medium text-gray-900">{{ currentProject?.name || 'Chat' }}</h2>
           <p class="text-sm text-gray-500">{{ currentProject?.description || '' }}</p>
@@ -28,8 +29,8 @@
                   (click)="jumpToMessage(message)"
                   class="flex px-2 py-1.5 text-sm hover:bg-gray-100 rounded-md cursor-pointer transition-colors"
                 >
-                  <div class="w-8 h-8 rounded-full flex-shrink-0 bg-indigo-100 flex items-center justify-center mr-2">
-                    <span class="text-indigo-600 text-xs font-medium">{{ message.content.charAt(0).toUpperCase() }}</span>
+                  <div class="w-8 h-8 rounded-full flex-shrink-0 bg-slate-100 flex items-center justify-center mr-2">
+                    <span class="text-slate-600 text-xs font-medium">{{ message.content.charAt(0).toUpperCase() }}</span>
                   </div>
                   <div class="flex-1 min-w-0">
                     <p class="font-medium text-gray-800 truncate">{{ message.preview || message.content }}</p>
@@ -83,9 +84,9 @@
             <!-- Loading indicator -->
             <div *ngIf="isLoading" class="flex items-center justify-center py-4">
               <div class="animate-pulse flex space-x-2">
-                <div class="h-2 w-2 bg-indigo-600 rounded-full"></div>
-                <div class="h-2 w-2 bg-indigo-600 rounded-full"></div>
-                <div class="h-2 w-2 bg-indigo-600 rounded-full"></div>
+                <div class="h-2 w-2 bg-slate-600 rounded-full"></div>
+                <div class="h-2 w-2 bg-slate-600 rounded-full"></div>
+                <div class="h-2 w-2 bg-slate-600 rounded-full"></div>
               </div>
             </div>
           </div>
