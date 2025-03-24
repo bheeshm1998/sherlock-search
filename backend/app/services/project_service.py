@@ -14,7 +14,7 @@ from app.database import get_db
 from app.models.project import Project, Document
 from app.routes.document_routes import get_gemini_embedding
 from app.schemas.project import ProjectCreate, ProjectResponse, ProjectAbstractData
-from app.utils.s3 import upload_to_s3
+from app.utils.supabase import upload_to_supabase
 
 
 class ProjectService:
@@ -247,6 +247,15 @@ class ProjectService:
                         #     new_document.s3_url = s3_url  # Add this field to your Document model
                         # except Exception as e:
                         #     print(f"S3 upload error: {str(e)}")
+                        # new_document.s3_url = "default"
+
+                        # Upload to Supabase
+                        try:
+                            SUPABASE_BUCKET_NAME = os.getenv("SUPABASE_BUCKET_NAME")
+                            supabase_url = upload_to_supabase(temp_file_path, SUPABASE_BUCKET_NAME,  doc_data.name)
+                            new_document.s3_url = supabase_url  # Add this field to your Document model
+                        except Exception as e:
+                            print(f"Supabase upload error: {str(e)}")
                         new_document.s3_url = "default"
                         # For PDF files, extract text and create embeddings
                         if doc_data.file_extension and doc_data.file_extension.lower() == 'pdf':

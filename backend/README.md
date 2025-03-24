@@ -14,3 +14,13 @@ on linux and mac use
 ```
 source myenv/bin/activate
 ```
+
+start command for render
+```aiignore
+uvicorn app.main:app --host 0.0.0.0 --port 7888
+```
+
+pip install command for render
+```aiignore
+pip install -r requirements.txt
+```
