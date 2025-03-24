@@ -3,6 +3,10 @@
   <div class="bg-gradient-to-b from-blue-50 to-indigo-100 p-6 flex-1">
 
     <div class="max-w-7xl mx-auto">
+      <div *ngIf="loading" class="flex justify-center items-center h-full">
+        <div class="loader">Loading...</div>
+      </div>
+      <div *ngIf="!loading">
       <div class="flex justify-between items-center mb-8">
         <div>
           <h1 class="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
@@ -17,7 +21,7 @@
           New Project
         </button>
       </div>
-
+    </div>
       <!-- Projects Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @for (project of projects; track project.id) {

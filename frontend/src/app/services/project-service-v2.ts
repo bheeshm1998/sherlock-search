@@ -61,4 +61,8 @@ export class ProjectServiceV2 {
 
     return this.http.put<Project>(`${this.apiUrl}/projects/${id}/publish`, {});
   }
+
+  getAllProjectsForAUser(userId: string): Observable<Project[]> {
+    return this.http.get<Project[]>(`${this.apiUrl}/projects/user/${userId}`);
+  }
 }

@@ -116,5 +116,19 @@ async def publish_project(project_id: str):
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-        raise HTTPException(status_code=500, detail=e.__cause__)
+
+@router.get("/projects/user/{user_id}", response_model=List[ProjectAbstractData])
+async def get_projects_for_user(user_id: str):
+    """
+    Publish an existing project by updating its state to 'published'.
+    """
+    try:
+        # Call the ProjectService method to update the project state
+        projects = ProjectService.get_published_projects()
+        return projects
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
