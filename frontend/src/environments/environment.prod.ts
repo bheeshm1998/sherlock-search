@@ -1,6 +1,6 @@
 export const environment = {
     production: true,
-    apiBaseUrl: 'https://api.example.com',
+    apiBaseUrl: 'https://sherlock-search-1.onrender.com',
     loggingEnabled: false
   };
   
