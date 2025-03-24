@@ -4,7 +4,6 @@ from supabase import create_client, Client
 SUPABASE_URL = "https://zlwixccfktvgyrurvrlp.supabase.co"
 SUPABASE_KEY = os.getenv("SUPABASE_API_KEY")  # Store this securely
 
-print(SUPABASE_KEY, "SUPABASE_KEY")
 # Initialize Supabase client
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
