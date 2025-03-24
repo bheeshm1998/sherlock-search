@@ -18,6 +18,7 @@ import { FooterComponent } from '../../../components/footer/footer.component';
 export class AdminDashboardComponent {
 
   ProjectState: any = ProjectState;
+  loading: boolean = true;
   projects: any[] = [];
   constructor(private router: Router, private projectService: ProjectServiceV2) { }
 
@@ -30,8 +31,10 @@ export class AdminDashboardComponent {
       .subscribe({
         next: (data) => {
           this.projects = data;
+          this.loading = false
         },
         error: (err) => {
+          this.loading = false;
           console.error('Error fetching projects:', err);
         }
       });

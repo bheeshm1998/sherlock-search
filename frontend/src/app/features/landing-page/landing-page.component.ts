@@ -33,7 +33,7 @@ export class LandingPageComponent {
     if (this.userType === 'admin') {
       this.router.navigate(['/admin-dashboard']);
     } else {
-      this.router.navigate(['/user-dashboard']);
+      this.router.navigate(['/user-dashboard', "1"]);
     }
   }
 }

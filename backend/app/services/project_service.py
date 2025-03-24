@@ -156,6 +156,31 @@ class ProjectService:
             db.close()
 
     @staticmethod
+    def get_published_projects() -> List[ProjectAbstractData]:
+        """
+        Fetch all projects from the database and return them as ProjectAbstractData.
+        """
+        db: Session = next(get_db())
+        try:
+            projects = db.query(Project).filter(Project.state == "PUBLISHED").all()  # Retrieve all projects from the database
+            # Transform each Project into ProjectAbstractData
+            return [
+                ProjectAbstractData(
+                    id=project.id,
+                    name=project.name,
+                    description=project.description,
+                    access_type=project.access_type,
+                    state=project.state,
+                    num_documents=len(project.documents),
+                    updated_at=project.updated_at
+                )
+                for project in projects
+            ]
+        finally:
+            db.close()
+
+
+    @staticmethod
     def create_project_v2(project_data: ProjectCreate, files: List[dict] = None) -> ProjectResponse:
         """
         Create a new project in the database with associated documents.
