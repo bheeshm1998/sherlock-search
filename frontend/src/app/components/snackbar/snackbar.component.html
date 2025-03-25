@@ -1,0 +1,8 @@
+<div *ngIf="snackbar$ | async as snackbarObj"
+class="fixed bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-lg shadow-lg text-white"
+[ngClass]="{
+  'bg-green-600': snackbarObj.type === 'success',
+  'bg-red-600': snackbarObj.type === 'error'
+}">
+{{ snackbarObj.message }}
+</div>
