@@ -29,7 +29,7 @@
             </svg>
             <div class="ml-4">
               <p class="text-sm text-gray-500">Access Type</p>
-              <p class="font-medium text-gray-900">{{ project.accessType || 'N/A' }}</p>
+              <p class="font-medium text-gray-900">{{ project.access_type || 'N/A' }}</p>
             </div>
           </div>
 
@@ -40,7 +40,7 @@
             </svg>
             <div class="ml-4">
               <p class="text-sm text-gray-500">Created</p>
-              <p class="font-medium text-gray-900">{{ project.createdAt | date:'medium' }}</p>
+              <p class="font-medium text-gray-900">{{ project.created_at | date:'medium' }}</p>
             </div>
           </div>
           
@@ -51,7 +51,7 @@
             </svg>
             <div class="ml-4">
               <p class="text-sm text-gray-500">Updated</p>
-              <p class="font-medium text-gray-900">{{ project.updatedAt | date:'medium' }}</p>
+              <p class="font-medium text-gray-900">{{ project.updated_at | date:'medium' }}</p>
             </div>
           </div>
         </div>
@@ -71,23 +71,23 @@
                 <!-- File Type Icon -->
                 <div class="w-10 h-10 rounded-lg flex items-center justify-center" 
                      [ngClass]="{
-                       'bg-blue-100 text-blue-700': doc.fileExtension === 'pdf',
-                       'bg-green-100 text-green-700': doc.fileExtension === 'xlsx' || doc.fileExtension === 'xls',
-                       'bg-yellow-100 text-yellow-700': doc.fileExtension === 'doc' || doc.fileExtension === 'docx',
-                       'bg-purple-100 text-purple-700': doc.fileExtension === 'ppt' || doc.fileExtension === 'pptx',
-                       'bg-gray-100 text-gray-700': !doc.fileExtension
+                       'bg-blue-100 text-blue-700': doc.file_extension === 'pdf',
+                       'bg-green-100 text-green-700': doc.file_extension === 'xlsx' || doc.file_extension === 'xls',
+                       'bg-yellow-100 text-yellow-700': doc.file_extension === 'doc' || doc.file_extension === 'docx',
+                       'bg-purple-100 text-purple-700': doc.file_extension === 'ppt' || doc.file_extension === 'pptx',
+                       'bg-gray-100 text-gray-700': !doc.file_extension
                      }">
-                  <svg *ngIf="doc.fileExtension === 'pdf'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg *ngIf="doc.file_extension === 'pdf'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                   </svg>
-                  <svg *ngIf="doc.fileExtension === 'xlsx' || doc.fileExtension === 'xls'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg *ngIf="doc.file_extension === 'xlsx' || doc.file_extension === 'xls'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  <svg *ngIf="doc.fileExtension === 'doc' || doc.fileExtension === 'docx'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg *ngIf="doc.file_extension === 'doc' || doc.file_extension === 'docx'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  <span *ngIf="!['pdf', 'xlsx', 'xls', 'doc', 'docx', 'ppt', 'pptx'].includes(doc.fileExtension)" class="text-xs font-bold uppercase">
-                    {{ doc.fileExtension }}
+                  <span *ngIf="!['pdf', 'xlsx', 'xls', 'doc', 'docx', 'ppt', 'pptx'].includes(doc.file_extension)" class="text-xs font-bold uppercase">
+                    {{ doc.file_extension }}
                   </span>
                 </div>
                 
@@ -110,20 +110,22 @@
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span>Uploaded {{ doc.uploadedAt | date:'medium' }}</span>
+                  <span>Uploaded {{ doc.uploaded_at | date:'medium' }}</span>
                 </div>
               </div>
               
               <!-- Card Footer -->
               <div class="flex border-t border-gray-100">
-                <button class="flex-1 text-center py-3 text-sm text-blue-600 hover:bg-blue-50 transition-colors duration-200">
+                <button disabled
+                class="flex-1 text-center py-3 text-sm text-blue-600 hover:bg-blue-50 transition-colors duration-200 opacity-50 cursor-not-allowed">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
                   View
                 </button>
-                <button class="flex-1 text-center py-3 text-sm text-blue-600 hover:bg-blue-50 transition-colors duration-200">
+                <button disabled
+                class="flex-1 text-center py-3 text-sm text-blue-600 hover:bg-blue-50 transition-colors duration-200 opacity-50 cursor-not-allowed">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
@@ -141,6 +143,9 @@
           Delete Project
         </button>
         <div class="flex space-x-4">
+          <button (click)="gotoDashBoard()" class="bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium px-4 py-2 rounded-md cursor-pointer">
+            Back to Dashboard
+          </button>
           <button (click)="editProject()" class="bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium px-4 py-2 rounded-md cursor-pointer">
             Edit Project
           </button>
