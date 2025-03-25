@@ -13,7 +13,7 @@ export const routes: Routes = [
     { path: "user-dashboard/:id", component: UserDashboardComponent},
     { path: "create-project", component: CreateProjectComponent},
     { path: "edit-project/:id", component: CreateProjectComponent},
-    { path: "project-details/:id", component: ProjectDetailsComponent},
+    { path: "project-details/:projectId", component: ProjectDetailsComponent},
     { path: "chat/:id", component: ChatComponent },
     { path: '**', redirectTo: '/home' }
   ];

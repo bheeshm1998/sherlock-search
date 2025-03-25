@@ -54,7 +54,7 @@ export class ProjectServiceV2 {
   }
 
   getProjectById(id: string): Observable<Project> {
-    return this.http.get<Project>(`${this.apiUrl}/${id}`);
+    return this.http.get<Project>(`${this.apiUrl}/projects/${id}`);
   }
 
   publishProject(id: string | number): Observable<Project> {
