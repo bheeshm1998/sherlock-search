@@ -6,11 +6,11 @@ import os
 from app.routes.document_routes import get_gemini_embedding
 
 
-class ChatService:
-    def __init__(self):
+class ChatService():
+    def __init__(self,project_id):
         # Initialize Pinecone
         self.pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
-        self.index_name = os.getenv("PINECONE_INDEX_NAME")
+        self.index_name = f"project-{project_id}"
         self.index = self.pc.Index(self.index_name)
 
         # Initialize Gemini client

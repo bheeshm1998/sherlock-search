@@ -1,4 +1,3 @@
-
 import logging
 from dotenv import load_dotenv
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -38,7 +37,8 @@ load_dotenv()
 async def list_documents(project_id: str, limit: int = 10):
     try:
         # Get the Pinecone index
-        index = pc.Index(PINECONE_INDEX_NAME)
+        index_name = f"project-{project_id}"
+        index = pc.Index(index_name)
 
         # Use the query method to retrieve a list of vectors
         # Note: Pinecone does not support listing all vectors directly, so we use a dummy query
@@ -65,7 +65,8 @@ async def list_documents(project_id: str, limit: int = 10):
 async def delete_document(document_id: str):
     try:
         # Initialize the Pinecone index
-        index = pc.Index(PINECONE_INDEX_NAME)
+        index_name = f"project-{project_id}"
+        index = pc.Index(index_name)
 
         logger.info(f"Deleting document with ID: {document_id}")
 
