@@ -26,11 +26,11 @@ def get_project_messages(project_id: str):
         raise HTTPException(status_code=500, detail=f"An error occurred: {e.__cause__.__str__()}")
 
 
-@router.post("/chat/")
-async def chat(request: ChatRequest):
+@router.post("/chat/{project_id}")
+async def chat(project_id: str,request: ChatRequest):
     try:
         # Call the service to handle the chat logic
-        chatService = ChatService()
+        chatService = ChatService(project_id)
         response = chatService.handle_chat(user_message = request.query)
         return {"response": response}
 
