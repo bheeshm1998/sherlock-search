@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, Enum, ForeignKey
+from sqlalchemy import Column, String, DateTime, Enum, ForeignKey, Integer
 from sqlalchemy.ext.declarative import declarative_base
 import enum
 
@@ -13,7 +13,7 @@ class RoleEnum(enum.Enum):
 class Message(Base):
     __tablename__ = "messages"
 
-    id = Column(String, primary_key=True, index=True)  # Primary key
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     content = Column(String, nullable=False)  # Message content
     role = Column(Enum(RoleEnum), nullable=False)  # Enum for specifying roles
     timestamp = Column(DateTime, nullable=False)  # Timestamp of the message

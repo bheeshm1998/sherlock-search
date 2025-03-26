@@ -1,8 +1,12 @@
 import json
+import os
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
 from typing import List, Optional
 
+from supabase import create_client
+
+from app.routes.auth_routes import get_current_user
 from app.schemas.project import ProjectCreate, ProjectResponse, DocumentCreate, ProjectAbstractData
 from app.services.project_service import ProjectService
 
@@ -101,7 +105,6 @@ def get_project_by_id(project_id: str):
     """
     # Query the project from the database
     project = ProjectService.getProjectById(project_id)
-
     return project
 
 @router.put("/projects/{project_id}/publish", response_model=ProjectAbstractData)
@@ -127,6 +130,21 @@ async def get_projects_for_user(user_id: str):
     try:
         # Call the ProjectService method to update the project state
         projects = ProjectService.get_published_projects()
+        return projects
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/projects/user/{user_id}", response_model=List[ProjectAbstractData])
+async def get_projects_for_user_v2(user_id: str, user: dict = Depends(get_current_user)):
+    """
+    Publish an existing project by updating its state to 'published'.
+    """
+    # user_id is user email
+    try:
+        # Call the ProjectService method to update the project state
+        projects = ProjectService.get_projects_for_user(user_id)
         return projects
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

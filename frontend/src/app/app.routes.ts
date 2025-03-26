@@ -10,10 +10,10 @@ export const routes: Routes = [
     { path: '', redirectTo: '/home', pathMatch: 'full' },
     { path: "home", component: LandingPageComponent},
     { path: "admin-dashboard", component: AdminDashboardComponent},
-    { path: "user-dashboard/:id", component: UserDashboardComponent},
+    { path: "user-dashboard/:userId", component: UserDashboardComponent},
     { path: "create-project", component: CreateProjectComponent},
     { path: "edit-project/:id", component: CreateProjectComponent},
     { path: "project-details/:projectId", component: ProjectDetailsComponent},
-    { path: "chat/:id", component: ChatComponent },
+    { path: "chat/:projectId", component: ChatComponent },
     { path: '**', redirectTo: '/home' }
   ];

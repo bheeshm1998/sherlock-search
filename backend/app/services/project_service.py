@@ -4,18 +4,28 @@ import tempfile
 import pdfplumber
 from fastapi import HTTPException
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from sklearn.utils import deprecated
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from uuid import uuid4
 from datetime import datetime
 from typing import List
 
+from supabase import create_client, Client
+
 from app.config.pinecone_init import pc
 from app.database import get_db
-from app.models.project import Project, Document
+from app.models.project import Project, Document, project_group_association, ProjectGroup
 from app.routes.document_routes import get_gemini_embedding
 from app.schemas.project import ProjectCreate, ProjectResponse, ProjectAbstractData
 from app.utils.supabase import upload_to_supabase
 
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_API_KEY")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+
+# Initialize Supabase client
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 class ProjectService:
 
@@ -88,12 +98,18 @@ class ProjectService:
         # Return the project details
         return project
 
+    @deprecated
     @staticmethod
     def create_project(project_data: ProjectCreate) -> ProjectResponse:
         """
         Create a new project in the database.
         """
         db: Session = next(get_db())
+
+        existing_project = db.query(Project).filter_by(name=project_data.name).first()
+        if existing_project:
+            raise ValueError(f"A project with the name '{project_data.name}' already exists.")
+
         try:
             new_project = Project(
                 id=str(uuid4()),
@@ -186,6 +202,11 @@ class ProjectService:
         Create a new project in the database with associated documents.
         """
         db: Session = next(get_db())
+
+        existing_project = db.query(Project).filter_by(name=project_data.name).first()
+        if existing_project:
+            raise ValueError(f"A project with the name '{project_data.name}' already exists.")
+
         try:
             # Create project
             project_id = str(uuid4())
@@ -315,3 +336,53 @@ class ProjectService:
             raise e
         finally:
             db.close()
+
+
+@staticmethod
+def get_projects_for_user(email: str) -> List[ProjectAbstractData]:
+    # Step 1: Get email ID from emails table
+    email_response = supabase.from_("emails").select("id").eq("email", email).single().execute()
+    email_data = email_response.data
+
+    if not email_data:
+        raise HTTPException(status_code=404, detail="Email not found")
+
+    email_id = email_data["id"]
+
+    # Step 2: Get group IDs from email_groups table
+    email_groups_response = (
+        supabase.from_("email_groups").select("group_id").eq("email_id", email_id).execute()
+    )
+    email_groups_data = email_groups_response.data
+
+    if not email_groups_data:
+        return {"groups": []}  # No groups found for this email
+
+    group_ids = [eg["group_id"] for eg in email_groups_data]
+
+    # Step 3: Get group details from groups table
+    groups_response = supabase.from_("groups").select("*").in_("id", group_ids).execute()
+    db: Session = next(get_db())
+    list_of_projects = get_projects_by_group_names(db, groups_response.data)
+    return [
+        ProjectAbstractData(
+            id=project.id,
+            name=project.name,
+            description=project.description,
+            access_type=project.access_type,
+            state=project.state,
+            num_documents=len(project.documents),
+            updated_at=project.updated_at
+        )
+        for project in list_of_projects
+    ]
+
+    return {"groups": groups_response.data}
+
+def get_projects_by_group_names(db: Session, group_names: list[str]):
+    return db.execute(
+        select(Project)
+        .join(project_group_association)
+        .join(ProjectGroup, ProjectGroup.id == project_group_association.c.projectgroup_id)
+        .where(ProjectGroup.name.in_(group_names), Project.state == "PUBLISHED")
+    ).scalars().all()

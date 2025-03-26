@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ProjectServiceV2 } from '../../../services/project-service-v2';
 import { Subscription } from 'rxjs';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-user-dashboard',
@@ -18,14 +19,14 @@ export class UserDashboardComponent {
 
     ProjectState: any = ProjectState;
     projects: any[] = [];
-    currentUserId: string = ""
+    currentUserId: string | any = ""
 
-    private subscriptions: Subscription[] = [];
+    // private subscriptions: Subscription[] = [];
     projectId: any;
     loading: boolean = true;
 
     constructor(private router: Router, private route: ActivatedRoute,
-         private projectService: ProjectServiceV2) { }
+         private projectService: ProjectServiceV2, private authService: AuthService) { }
 
   handleLogout(): void {
     console.log("Clicked on logout button")
@@ -37,21 +38,12 @@ export class UserDashboardComponent {
   }
 
   openChat() {
-    this.router.navigate(['/chat', this.currentUserId]);
+    this.router.navigate(['/chat', this.projectId]);
   }
 
   ngOnInit(): void {
-    this.subscriptions.push(
-      this.route.paramMap.subscribe(params => {
-        const id = params.get('id');
-        if (id) {
-          this.currentUserId = id;
-          this.getAllProjectsForTheUser(this.currentUserId);
-        } else {
-          this.router.navigate(['/projects']);
-        }
-      })
-    );
+    this.currentUserId = this.authService.getCurrentUser();
+    this.getAllProjectsForTheUser(this.currentUserId);
   }
 
   loadProject() {

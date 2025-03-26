@@ -12,17 +12,22 @@ export class ChatService {
   
   constructor(private http: HttpClient) {}
   
-  generateResponse(message: string): Observable<string> {
-    return this.http.post<{ response: string }>(`${this.apiUrl}/chat/`, {
-      query: message
-    }).pipe(
+  generateResponse(message: string, project_id: any, user_id: any): Observable<string> {
+    return this.http.post<{ response: string }>(
+      `${this.apiUrl}/chat/${project_id}/${user_id}`,
+      {
+        content: message,  // Changed from 'query' to 'content' to match Python model
+        project_id: project_id,
+        user_id: user_id
+      }
+    ).pipe(
       map(response => response.response),
       catchError(error => {
         console.error('API error:', error);
         return throwError(() => new Error('Failed to get response from the chat API'));
       })
     );
-  }
+}
   
   getFAQs(): Observable<{question: string, answer: string}[]> {
     // This could be replaced with an actual API call if you have a FAQ endpoint

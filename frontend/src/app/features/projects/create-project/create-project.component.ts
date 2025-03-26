@@ -8,6 +8,7 @@ import { AttachedDocument } from '../../../models/document.model';
 import { HeaderComponent } from "../../../components/header/header.component";
 import { FooterComponent } from "../../../components/footer/footer.component";
 import { SnackbarService } from '../../../services/snackbar.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-create-project',
@@ -29,6 +30,9 @@ export class CreateProjectComponent {
   accessTypes = ['Private', 'Restricted', 'Public'];
   submitBtnText = 'Create Project';
 
+  groups: string[] = [];
+  selectedGroups: string[] = [];
+
   projectId: string | null = null;
 
   constructor(
@@ -36,11 +40,12 @@ export class CreateProjectComponent {
     private router: Router, 
     private route: ActivatedRoute, 
     private snackbarService: SnackbarService,
-    private projectService: ProjectServiceV2) { }
+    private projectService: ProjectServiceV2,
+    private authService: AuthService) { }
 
   ngOnInit() {
     this.initForm();
-
+    this.fetchGroups()
     this.route.paramMap.subscribe(params => {
       this.projectId = params.get('id');
       if (this.projectId) {
@@ -178,5 +183,19 @@ export class CreateProjectComponent {
 
   cancel(): void {
     this.router.navigate(['/admin-dashboard']);
+  }
+
+  fetchGroups() {
+    this.authService.getGroups().subscribe((data) => {
+      this.groups = data.groups;
+    });
+  }
+  
+  toggleGroup(group: string) {
+    if (this.selectedGroups.includes(group)) {
+      this.selectedGroups = this.selectedGroups.filter(c => c !== group);
+    } else {
+      this.selectedGroups.push(group);
+    }
   }
 }

@@ -5,7 +5,7 @@ from typing import Optional, List
 
 # Model for creating a new document
 class DocumentCreate(BaseModel):
-    name: str
+    name: int
     description: Optional[str] = None
     document_type: str
     file_extension: Optional[str] = None
@@ -13,7 +13,7 @@ class DocumentCreate(BaseModel):
 
 # Model for responding with document details
 class DocumentResponse(BaseModel):
-    id: str
+    id: int
     name: str
     description: Optional[str]
     uploaded_at: datetime
@@ -26,20 +26,22 @@ class DocumentResponse(BaseModel):
 
 # Model for creating a new project
 class ProjectCreate(BaseModel):
-    name: str
+    name: int
     description: Optional[str] = None
     access_type: Optional[str] = None
     state: Optional[str] = "DRAFT"  # Default state is DRAFT
+    groups: Optional[str] = "ALL"
     documents: Optional[List[DocumentCreate]] = None  # Include documents field
 
 # Model for responding with project details
 class ProjectResponse(BaseModel):
-    id: str
+    id: int
     name: str
     description: Optional[str]
     created_at: datetime
     updated_at: datetime
     access_type: Optional[str]
+    groups: Optional[str]
     state: str
     documents: List[DocumentResponse]  # Include documents field
 
@@ -49,7 +51,7 @@ class ProjectResponse(BaseModel):
 
 # Model for creating a new project
 class ProjectAbstractData(BaseModel):
-    id: str
+    id: int
     name: str
     description: Optional[str] = None
     access_type: Optional[str] = None
