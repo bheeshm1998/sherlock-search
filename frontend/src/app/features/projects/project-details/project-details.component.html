@@ -20,7 +20,7 @@
 
       <div class="max-w-5xl mx-auto p-6 bg-white rounded-xl">
 
-        <div class="flex items-center p-4 bg-teal-50 rounded-lg mb-2">
+        <div *ngIf="loggedInUserType == 'admin'" class="flex items-center p-4 bg-teal-50 rounded-lg mb-2">
           <div class="ml-4">
             <p class="text-sm text-gray-500">Groups accessible</p>
             <div class="flex flex-wrap gap-2">
@@ -162,7 +162,7 @@
             Edit Project
           </button>
           <button (click)="openChat()" class="px-6 py-2 bg-teal-800 text-gray-100 disabled:pointer-events-none disabled:bg-gray-200 disabled:text-gray-800 rounded-md text-sm font-medium hover:bg-teal-900 hover:text-white hover:cursor-pointer">
-            Chat with the documents
+            Chat with documents
           </button>
         </div>
       </div>

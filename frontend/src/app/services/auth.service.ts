@@ -20,6 +20,8 @@ export class AuthService {
   private apiUrl = `${environment.apiBaseUrl}`;
   private http = inject(HttpClient);
 
+  private currentUserType: string = ""
+
   constructor() { }
 
     checkGroup(id: string): Observable<any> {
@@ -72,4 +74,13 @@ export class AuthService {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('current_logged_in_user');
   }
+
+  setCurrentUserType(type: string): void {
+    this.currentUserType = type;
+  }
+
+  getCurrentUserType(): string {
+    return this.currentUserType;
+  }
+  
 }

@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { HeaderComponent } from "../../../components/header/header.component";
 import { FooterComponent } from "../../../components/footer/footer.component";
 import { ProjectServiceV2 } from '../../../services/project-service-v2';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-project-details',
@@ -18,16 +19,19 @@ export class ProjectDetailsComponent {
   ProjectState = ProjectState;
   groups: any[] = [];
 
+  loggedInUserType: string = "";
+
   @Input() projectId: string = "";
   project: any;
   
-  constructor(private router: Router, private projectService: ProjectServiceV2,  private route: ActivatedRoute ) {}
+  constructor(private router: Router, private projectService: ProjectServiceV2,  private route: ActivatedRoute, private authService: AuthService ) {}
 
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.projectId = params['projectId'];  // Get projectId from route parameters
       this.fetchProjectDetails();
     });
+    this.loggedInUserType = this.authService.getCurrentUserType();
   }
 
   fetchProjectDetails() {

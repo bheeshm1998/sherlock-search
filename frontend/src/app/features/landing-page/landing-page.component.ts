@@ -60,6 +60,7 @@ export class LandingPageComponent {
         next: (response) => {
           // Assuming the token is in response.token - adjust according to your API response structure
           this.snackbarService.showSnackbar("Login success", "success")
+          this.authService.setCurrentUserType(this.userType);
           if(this.userType == "admin") {
             this.router.navigate(['/admin-dashboard']);
           } else {
