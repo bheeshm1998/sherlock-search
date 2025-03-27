@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Project } from '../models/project.model';
 import { environment } from '../../environments/environment';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +11,8 @@ import { environment } from '../../environments/environment';
 export class ProjectServiceV2 {
   private apiUrl = `${environment.apiBaseUrl}`;
   private http = inject(HttpClient);
+
+  constructor(private authService: AuthService) { }
 
   getAllProjects(): Observable<Project[]> {
     return this.http.get<Project[]>(`${this.apiUrl}/projects`);
@@ -63,6 +66,10 @@ export class ProjectServiceV2 {
   }
 
   getAllProjectsForAUser(userId: string): Observable<Project[]> {
-    return this.http.get<Project[]>(`${this.apiUrl}/projects/user/${userId}`);
+
+    const headers = new HttpHeaders({
+            'Authorization': 'Bearer ' + this.authService.getToken()
+          });
+    return this.http.get<Project[]>(`${this.apiUrl}/projects/user/${userId}`, { headers });
   }
 }

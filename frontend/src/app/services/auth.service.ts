@@ -27,7 +27,7 @@ export class AuthService {
     }
 
     loginUser(email: string, userType: string): Observable<TokenResponse> {
-      
+
       const authRequest = { email: email, userType: userType };
       
       const headers = new HttpHeaders({
@@ -42,7 +42,7 @@ export class AuthService {
         tap(response => {
           // Store the token in localStorage or a service
           if (response.token) {
-            localStorage.setItem('current_logged_in_user', response.token);
+            localStorage.setItem('current_logged_in_user', email);
             localStorage.setItem('auth_token', response.token);
           }
         })

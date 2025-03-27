@@ -532,26 +532,64 @@ class ProjectService:
             db.close()
 
 
-@staticmethod
-def get_projects_for_user(email: str) -> List[ProjectAbstractData]:
-    # Step 1: Get email ID from emails table
-    email_response = supabase.from_("emails").select("id").eq("email", email).single().execute()
-    email_data = email_response.data
+    @staticmethod
+    def get_projects_for_user(email: str) -> List[ProjectAbstractData]:
+        # Step 1: Get email ID from emails table
+        email_response = supabase.from_("emails").select("id").eq("email", email).single().execute()
+        email_data = email_response.data
 
-    if not email_data:
-        raise HTTPException(status_code=404, detail="Email not found")
+        if not email_data:
+            raise HTTPException(status_code=404, detail="Email not found")
 
-    email_id = email_data["id"]
+        email_id = email_data["id"]
 
-    # Step 2: Get group IDs from email_groups table
-    email_groups_response = (
-        supabase.from_("email_groups").select("group_id").eq("email_id", email_id).execute()
-    )
-    email_groups_data = email_groups_response.data
+        # Step 2: Get group IDs from email_groups table
+        email_groups_response = (
+            supabase.from_("email_groups").select("group_id").eq("email_id", email_id).execute()
+        )
+        email_groups_data = email_groups_response.data
 
-    if not email_groups_data:
-        return {"groups": []}  # No groups found for this email
+        if not email_groups_data:
+            return {"groups": []}  # No groups found for this email
 
-    group_ids = [eg["group_id"] for eg in email_groups_data]
+        group_ids = [eg["group_id"] for eg in email_groups_data]
+
+        if not group_ids:
+            return []
+
+            # Step 1: Get all project_ids associated with the given group_ids
+        project_groups_response = (
+            supabase
+            .from_("project_groups")
+            .select("project_id")
+            .in_("group_id", group_ids)
+            .execute()
+        )
+
+        if not project_groups_response.data:
+            return []
+
+        project_ids = list({entry["project_id"] for entry in project_groups_response.data})
+        db: Session = next(get_db())
+        # Step 2: Fetch projects with state="published"
+        projects_response  = (
+            db.query(Project)
+            .filter(Project.id.in_(project_ids), Project.state == "PUBLISHED")
+            .all()
+        )
+
+        return [
+            ProjectAbstractData(
+                id=project.id,
+                name=project.name,
+                description=project.description,
+                access_type=project.access_type,
+                state=project.state,
+                num_documents=len(project.documents),
+                updated_at=project.updated_at
+            )
+            for project in projects_response
+            ]
+
 
 
