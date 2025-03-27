@@ -8,7 +8,9 @@ import { AttachedDocument } from '../../../models/document.model';
 import { HeaderComponent } from "../../../components/header/header.component";
 import { FooterComponent } from "../../../components/footer/footer.component";
 import { SnackbarService } from '../../../services/snackbar.service';
+
 import { AuthService } from '../../../services/auth.service';
+
 
 @Component({
   selector: 'app-create-project',
@@ -40,8 +42,10 @@ export class CreateProjectComponent {
     private router: Router, 
     private route: ActivatedRoute, 
     private snackbarService: SnackbarService,
+
     private projectService: ProjectServiceV2,
     private authService: AuthService) { }
+
 
   ngOnInit() {
     this.initForm();
@@ -166,12 +170,15 @@ export class CreateProjectComponent {
         this.projectService.createProject(projectData, files, this.selectedGroups).subscribe({
           next: response => {
             console.log('Project created successfully:', response);
+
             this.snackbarService.showSnackbar('Project created Successfully.', 'success')
             this.router.navigate(['/admin-dashboard']);
           },
           error: error => {
             console.error('Error creating project:', error);
+
             this.snackbarService.showSnackbar(`${error.error.detail}`, 'error');
+
             this.isSubmitting = false;
           },
           complete: () => (this.isSubmitting = false)
