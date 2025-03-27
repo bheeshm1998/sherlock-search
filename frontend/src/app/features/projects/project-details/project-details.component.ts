@@ -19,6 +19,10 @@ import { AuthService } from '../../../services/auth.service';
 export class ProjectDetailsComponent {
 
   ProjectState = ProjectState;
+  projectId: any = " ";
+  loggedInUserType: any = " ";
+  project: any;
+  groups: any;
 
   constructor(private router: Router, private projectService: ProjectServiceV2,  private route: ActivatedRoute, private authService: AuthService ) {}
 
