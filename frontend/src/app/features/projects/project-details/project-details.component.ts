@@ -6,6 +6,9 @@ import { HeaderComponent } from "../../../components/header/header.component";
 import { FooterComponent } from "../../../components/footer/footer.component";
 import { ProjectServiceV2 } from '../../../services/project-service-v2';
 
+import { AuthService } from '../../../services/auth.service';
+
+
 @Component({
   selector: 'app-project-details',
   standalone: true,
@@ -17,22 +20,26 @@ export class ProjectDetailsComponent {
 
   ProjectState = ProjectState;
 
-  @Input() projectId: string = "";
-  project: any;
-  
-  constructor(private router: Router, private projectService: ProjectServiceV2,  private route: ActivatedRoute ) {}
+  constructor(private router: Router, private projectService: ProjectServiceV2,  private route: ActivatedRoute, private authService: AuthService ) {}
+
 
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.projectId = params['projectId'];  // Get projectId from route parameters
       this.fetchProjectDetails();
     });
+
+    this.loggedInUserType = this.authService.getCurrentUserType();
+
   }
 
   fetchProjectDetails() {
     this.projectService.getProjectById(this.projectId).subscribe({
       next: response => {
-        this.project = response;
+
+        this.project = response.project;
+        this.groups = response.groups.map((group: any) => group.name);
+
         console.log('Project details fetched successfully:', response);
         this.router.navigate(['/project-details', this.projectId]);
       },
@@ -55,7 +62,7 @@ export class ProjectDetailsComponent {
 
   openChat() {
     console.log("Navigating to the chat component")
-    this.router.navigate(['/chat', 1]);
+    this.router.navigate(['/chat', this.projectId]);
   }
 
   deleteProject() {

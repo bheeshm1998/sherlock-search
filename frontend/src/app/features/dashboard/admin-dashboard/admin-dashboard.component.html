@@ -4,7 +4,7 @@
 
     <div class="max-w-7xl mx-auto">
       <div *ngIf="loading" class="flex justify-center items-center h-full">
-        <div class="loader">Loading...</div>
+        <div class="loader text-5xl mt-6">Loading...</div>
       </div>
       <div *ngIf="!loading">
       <div class="flex justify-between items-center mb-8">
@@ -79,7 +79,7 @@
           </div>
         </div>
         } @empty {
-        <div class="col-span-full flex justify-center items-center p-12">
+        <div *ngIf="!loading" class="col-span-full flex justify-center items-center p-12">
           <div class="text-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none"
               viewBox="0 0 24 24" stroke="#001d3d">

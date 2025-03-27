@@ -7,10 +7,11 @@ class MessageCreate(BaseModel):
     content: str
     project_id: str
     user_id: str
+    role: Literal['user', 'assistant']
 
 
 class MessageResponse(BaseModel):
-    id: str
+    id: int
     content: str
     role: Literal['user', 'assistant']
     timestamp: datetime

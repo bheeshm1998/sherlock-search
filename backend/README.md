@@ -24,3 +24,12 @@ pip install command for render
 ```aiignore
 pip install -r requirements.txt
 ```
+
+Script for creating the projects_group table
+```aiignore
+CREATE TABLE project_groups (
+    group_id INT,
+    project_id INT
+);
+
+```

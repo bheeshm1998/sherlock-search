@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Project } from '../models/project.model';
 import { environment } from '../../environments/environment';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,15 +12,18 @@ export class ProjectServiceV2 {
   private apiUrl = `${environment.apiBaseUrl}`;
   private http = inject(HttpClient);
 
+  constructor(private authService: AuthService) { }
+
   getAllProjects(): Observable<Project[]> {
     return this.http.get<Project[]>(`${this.apiUrl}/projects`);
   }
 
-  createProject(projectData: any, files: File[] | null): Observable<any> {
+  createProject(projectData: any, files: File[] | null, selectedGroups: any): Observable<any> {
     const formData = new FormData();
     
     // Append project data as JSON string
     formData.append('project_data', JSON.stringify(projectData));
+    formData.append("groups", JSON.stringify(selectedGroups))
     
     // Append files
     if(files) {
@@ -27,7 +31,6 @@ export class ProjectServiceV2 {
         formData.append('files', file, file.name);
       });
     }
-
 
     // Make the HTTP POST request
     return this.http.post<any>(`${this.apiUrl}/projectsv2`, formData);
@@ -53,8 +56,8 @@ export class ProjectServiceV2 {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/projects/${id}`);
   }
 
-  getProjectById(id: string): Observable<Project> {
-    return this.http.get<Project>(`${this.apiUrl}/projects/${id}`);
+  getProjectById(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/projects/${id}`);
   }
 
   publishProject(id: string | number): Observable<Project> {
@@ -63,6 +66,10 @@ export class ProjectServiceV2 {
   }
 
   getAllProjectsForAUser(userId: string): Observable<Project[]> {
-    return this.http.get<Project[]>(`${this.apiUrl}/projects/user/${userId}`);
+
+    const headers = new HttpHeaders({
+            'Authorization': 'Bearer ' + this.authService.getToken()
+          });
+    return this.http.get<Project[]>(`${this.apiUrl}/projects/user/${userId}`, { headers });
   }
 }

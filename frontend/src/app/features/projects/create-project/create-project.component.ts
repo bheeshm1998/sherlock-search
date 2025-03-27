@@ -9,6 +9,9 @@ import { HeaderComponent } from "../../../components/header/header.component";
 import { FooterComponent } from "../../../components/footer/footer.component";
 import { SnackbarService } from '../../../services/snackbar.service';
 
+import { AuthService } from '../../../services/auth.service';
+
+
 @Component({
   selector: 'app-create-project',
   standalone: true,
@@ -29,6 +32,9 @@ export class CreateProjectComponent {
   accessTypes = ['Private', 'Restricted', 'Public'];
   submitBtnText = 'Create Project';
 
+  groups: string[] = [];
+  selectedGroups: string[] = [];
+
   projectId: string | null = null;
 
   constructor(
@@ -36,11 +42,14 @@ export class CreateProjectComponent {
     private router: Router, 
     private route: ActivatedRoute, 
     private snackbarService: SnackbarService,
-    private projectService: ProjectServiceV2) { }
+
+    private projectService: ProjectServiceV2,
+    private authService: AuthService) { }
+
 
   ngOnInit() {
     this.initForm();
-
+    this.fetchGroups()
     this.route.paramMap.subscribe(params => {
       this.projectId = params.get('id');
       if (this.projectId) {
@@ -158,16 +167,18 @@ export class CreateProjectComponent {
           complete: () => (this.isSubmitting = false)
         });
       } else {
-        this.projectService.createProject(projectData, files).subscribe({
+        this.projectService.createProject(projectData, files, this.selectedGroups).subscribe({
           next: response => {
             console.log('Project created successfully:', response);
-            this.snackbarService.showSnackbar('Failed to create project.', 'error')
+
             this.snackbarService.showSnackbar('Project created Successfully.', 'success')
             this.router.navigate(['/admin-dashboard']);
           },
           error: error => {
             console.error('Error creating project:', error);
-            this.snackbarService.showSnackbar('Failed to create project.', 'error');
+
+            this.snackbarService.showSnackbar(`${error.error.detail}`, 'error');
+
             this.isSubmitting = false;
           },
           complete: () => (this.isSubmitting = false)
@@ -178,5 +189,19 @@ export class CreateProjectComponent {
 
   cancel(): void {
     this.router.navigate(['/admin-dashboard']);
+  }
+
+  fetchGroups() {
+    this.authService.getGroups().subscribe((data) => {
+      this.groups = data.groups;
+    });
+  }
+  
+  toggleGroup(group: string) {
+    if (this.selectedGroups.includes(group)) {
+      this.selectedGroups = this.selectedGroups.filter(c => c !== group);
+    } else {
+      this.selectedGroups.push(group);
+    }
   }
 }

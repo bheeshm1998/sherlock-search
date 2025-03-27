@@ -34,9 +34,7 @@ export class MessageService {
       id: uuidv4(),
       content,
       role: 'user',
-      timestamp: new Date(),
-      projectId: this.getCurrentProjectId(),
-      preview: this.createMessagePreview(content)
+      timestamp: new Date()
     };
     
     this.addMessage(newMessage);
@@ -47,8 +45,7 @@ export class MessageService {
       id: uuidv4(),
       content,
       role: 'assistant',
-      timestamp: new Date(),
-      projectId: this.getCurrentProjectId()
+      timestamp: new Date()
     };
     
     this.addMessage(newMessage);

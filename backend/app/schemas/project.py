@@ -2,6 +2,9 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional, List
 
+# class Group(BaseModel):
+#     id: int
+#     name: str
 
 # Model for creating a new document
 class DocumentCreate(BaseModel):
@@ -13,7 +16,7 @@ class DocumentCreate(BaseModel):
 
 # Model for responding with document details
 class DocumentResponse(BaseModel):
-    id: str
+    id: int
     name: str
     description: Optional[str]
     uploaded_at: datetime
@@ -31,10 +34,11 @@ class ProjectCreate(BaseModel):
     access_type: Optional[str] = None
     state: Optional[str] = "DRAFT"  # Default state is DRAFT
     documents: Optional[List[DocumentCreate]] = None  # Include documents field
+    # groups: Optional[List[Group]] = None
 
 # Model for responding with project details
 class ProjectResponse(BaseModel):
-    id: str
+    id: int
     name: str
     description: Optional[str]
     created_at: datetime
@@ -43,16 +47,32 @@ class ProjectResponse(BaseModel):
     state: str
     documents: List[DocumentResponse]  # Include documents field
 
+    # groups: List[Group]
+
     class Config:
         from_attributes = True  # Enable ORM mode (previously `orm_mode`)
 
-
 # Model for creating a new project
 class ProjectAbstractData(BaseModel):
-    id: str
+    id: int
     name: str
     description: Optional[str] = None
     access_type: Optional[str] = None
     state: Optional[str] = "DRAFT"  # Default state is DRAFT
     num_documents: int
     updated_at: datetime
+    # groups: List[Group]
+
+class ProjectDetailResponse(BaseModel):
+    id: int
+    name: str
+    description: Optional[str] = None
+    access_type: Optional[str] = None
+    state: Optional[str] = "DRAFT"  # Default state is DRAFT
+    num_documents: int
+    updated_at: datetime
+    groups: List[str]
+    documents: List[DocumentResponse]  # Include documents field
+
+    class Config:
+        from_attributes = True  # Enable ORM mode (previously `orm_mode`)

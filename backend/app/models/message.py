@@ -1,21 +1,14 @@
-from sqlalchemy import Column, String, DateTime, Enum, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-import enum
-
-Base = declarative_base()
+from sqlalchemy import Column, String, DateTime, Enum, ForeignKey, Integer
 
 
-class RoleEnum(enum.Enum):
-    user = "user"
-    assistant = "assistant"
-
+from app.database import Base
 
 class Message(Base):
     __tablename__ = "messages"
 
-    id = Column(String, primary_key=True, index=True)  # Primary key
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     content = Column(String, nullable=False)  # Message content
-    role = Column(Enum(RoleEnum), nullable=False)  # Enum for specifying roles
+    role = Column(String, nullable=False)  # Enum for specifying roles
     timestamp = Column(DateTime, nullable=False)  # Timestamp of the message
-    project_id = Column(String, ForeignKey("projects.id"), nullable=False)  # Project Foreign Key
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)  # User Foreign Key
+    project_id = Column(String, nullable=False)  # Project Foreign Key
+    user_id = Column(String, nullable=False)  # User Foreign Key
