@@ -24,6 +24,7 @@ router = APIRouter()
 # Auth Request Model
 class AuthRequest(BaseModel):
     email: str
+    userType: str
 
 # Token Response Model
 class TokenResponse(BaseModel):
@@ -55,7 +56,13 @@ async def login(auth_request: AuthRequest):
         "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
     }
     token = jwt.encode(token_data, SECRET_KEY, algorithm="HS256")
-    return {"token": token}
+    if(auth_request.userType == "admin"):
+        if (user["email"] == "abhishek.a@payoda.com"):
+            return {"token": token}
+        else :
+            raise HTTPException(status_code=401, detail="Not an admin")
+    else :
+        return {"token": token}
 
 
 # Dependency to Get Current User from Token

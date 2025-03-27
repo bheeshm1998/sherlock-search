@@ -11,6 +11,7 @@ import { NgFor, NgIf, AsyncPipe, DatePipe } from '@angular/common';
 import { InputFieldComponent } from '../../../components/input-field/input-field.component';
 import { MessageBubbleComponent } from '../../../components/message-bubble/message-bubble.component';
 import { ChatService } from '../../../services/chat.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-chat',
@@ -27,6 +28,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   currentProject: Project | undefined;
   isLoading = false;
   faqs!: Observable<{question: string, answer: string}[]>;
+
+  userId: any = "";
   
   private projectId!: string;
   private subscriptions: Subscription[] = [];
@@ -36,7 +39,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     private router: Router,
     private messageService: MessageService,
     private projectService: ProjectService,
-    private chatService: ChatService
+    private chatService: ChatService,
+    private authService: AuthService
   ) {}
   
   ngOnInit(): void {
@@ -51,7 +55,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
         }
       })
     );
-    
+    this.userId = this.authService.getCurrentUser();
     this.faqs = this.chatService.getFAQs();
   }
   
@@ -79,7 +83,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     
     // Get response from LLM service
     this.subscriptions.push(
-      this.chatService.generateResponse(content).subscribe({
+      this.chatService.generateResponse(content, this.projectId, this.userId).subscribe({
         next: (response) => {
           this.messageService.addAssistantMessage(response);
           this.isLoading = false;

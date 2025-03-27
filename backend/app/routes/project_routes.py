@@ -20,19 +20,20 @@ async def get_projects():
     projects = ProjectService.get_all_projects()
     return projects
 
-@router.post("/projects", response_model=ProjectResponse)
-async def create_project(project_data: ProjectCreate):
-    """
-    Create a new project.
-    """
-    project = ProjectService.create_project(project_data)
-    return project
+# @router.post("/projects", response_model=ProjectResponse)
+# async def create_project(project_data: ProjectCreate):
+#     """
+#     Create a new project.
+#     """
+#     project = ProjectService.create_project(project_data)
+#     return project
 
 
 @router.post("/projectsv2", response_model=ProjectResponse)
 async def create_project_v2(
         project_data: str = Form(...),
-        files: Optional[List[UploadFile]] = File(None)
+        files: Optional[List[UploadFile]] = File(None),
+        groups: Optional[List[str]] = Form("[]")
 ):
     """
     Create a new project with optional document uploads.
@@ -42,6 +43,7 @@ async def create_project_v2(
     """
     try:
         # Parse project data
+        groups = json.loads(groups[0]) if isinstance(groups, list) and len(groups) == 1 else groups
         project_dict = json.loads(project_data)
         project_create = ProjectCreate(**project_dict)
 
@@ -72,7 +74,7 @@ async def create_project_v2(
                 })
 
         # Create project with documents
-        project = ProjectService.create_project_v2(project_create, file_info_list)
+        project = ProjectService.create_project_v2(project_create, groups, file_info_list)
         return project
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -149,14 +151,14 @@ async def delete_project(project_id: str):
     return {"message": f"Project '{project_id}' deleted successfully."}
 
 
-@router.get("/projects/{project_id}", response_model=ProjectResponse)
-def get_project_by_id(project_id: str):
+@router.get("/projects/{project_id}")
+def get_project_by_id(project_id: int):
     """
     Get details for a project by its ID.
     """
     # Query the project from the database
-    project = ProjectService.getProjectById(project_id)
-    return project
+    project_and_groups = ProjectService.getProjectById(project_id)
+    return project_and_groups
 
 @router.put("/projects/{project_id}/publish", response_model=ProjectAbstractData)
 async def publish_project(project_id: str):

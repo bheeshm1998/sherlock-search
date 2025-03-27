@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sklearn.utils import deprecated
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from uuid import uuid4
 from datetime import datetime
 from typing import List,Optional
@@ -87,46 +87,73 @@ class ProjectService:
                 )
 
     @staticmethod
-    def getProjectById(project_id: str) -> Project:
+    def getProjectById(project_id: int) -> dict:
+
+        groups = ProjectService.get_groups_by_project(project_id)
+
         db: Session = next(get_db())
-        project = db.query(Project).filter(Project.id == project_id).first()
+        project = db.query(Project).options(joinedload(Project.documents)).filter(Project.id == project_id).first()
 
         # If project not found, raise an HTTP 404 exception
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
 
         # Return the project details
-        return project
+        return {"project": project, "groups": groups}
 
-    @deprecated
+
     @staticmethod
-    def create_project(project_data: ProjectCreate) -> ProjectResponse:
-        """
-        Create a new project in the database.
-        """
-        db: Session = next(get_db())
+    def get_groups_by_project(project_id: int) -> List[str]:
+        group_ids_response = (
+            supabase
+            .from_("project_groups")
+            .select("group_id")
+            .eq("project_id", project_id)
+            .execute()
+        )
 
-        existing_project = db.query(Project).filter_by(name=project_data.name).first()
-        if existing_project:
-            raise ValueError(f"A project with the name '{project_data.name}' already exists.")
+        # Extract just the group IDs from the response
+        group_ids = [item["group_id"] for item in group_ids_response.data]
 
-        try:
-            new_project = Project(
-                id=str(uuid4()),
-                name=project_data.name,
-                description=project_data.description,
-                created_at=datetime.now(),
-                updated_at=datetime.now(),
-            )
-            db.add(new_project)
-            db.commit()
-            db.refresh(new_project)
-            return ProjectResponse.model_validate(new_project)
-        except Exception as e:
-            db.rollback()
-            raise e
-        finally:
-            db.close()
+        # Second call: Get the group names for these IDs from the groups table
+        groups_response = (
+            supabase
+            .from_("groups")
+            .select("id, name")
+            .in_("id", group_ids)
+            .execute()
+        )
+        return groups_response.data
+
+    # @deprecated
+    # @staticmethod
+    # def create_project(project_data: ProjectCreate) -> ProjectResponse:
+    #     """
+    #     Create a new project in the database.
+    #     """
+    #     db: Session = next(get_db())
+    #
+    #     existing_project = db.query(Project).filter_by(name=project_data.name).first()
+    #     if existing_project:
+    #         raise ValueError(f"A project with the name '{project_data.name}' already exists.")
+    #
+    #     try:
+    #         new_project = Project(
+    #             id=str(uuid4()),
+    #             name=project_data.name,
+    #             description=project_data.description,
+    #             created_at=datetime.now(),
+    #             updated_at=datetime.now(),
+    #         )
+    #         db.add(new_project)
+    #         db.commit()
+    #         db.refresh(new_project)
+    #         return ProjectResponse.model_validate(new_project)
+    #     except Exception as e:
+    #         db.rollback()
+    #         raise e
+    #     finally:
+    #         db.close()
 
     @staticmethod
     def update_project(project_id: str, updated_data: dict) -> ProjectResponse:
@@ -363,7 +390,7 @@ class ProjectService:
             )
             db.add(new_project)
             db.flush()  # Flush to get project ID without committing
-
+            db.refresh(new_project)  # Ensure ID is populated
             project_id = new_project.id
 
             try:
@@ -398,11 +425,12 @@ class ProjectService:
                         uploaded_at=datetime.now(),
                         document_type=doc_data.document_type,
                         file_extension=doc_data.file_extension,
-                        size=doc_data.size
+                        size=doc_data.size,
+                        s3_url="default"
                     )
                     db.add(new_document)
                     db.flush()
-
+                    db.refresh(new_document)  # Ensure ID is populated
                     doc_id = new_document.id
                     # Process the file if it exists
                     if file_obj:
@@ -426,14 +454,11 @@ class ProjectService:
                             supabase_url = upload_to_supabase(temp_file_path, SUPABASE_BUCKET_NAME, project_id, doc_id)
                             if supabase_url:
                                 new_document.s3_url = supabase_url
-                            else:
-                                new_document.s3_url = "default"  # Only set default if upload fails
                         except Exception as e:
                             print(f"Supabase upload error: {str(e)}")
-                            new_document.s3_url = "default"
 
                         # For PDF files, extract text and create embeddings
-                        if doc_data.file_extension and doc_data.file_extension.lower() == 'pdf':
+                        if doc_data.file_extension and (doc_data.file_extension.lower() == 'pdf' or doc_data.file_extension.lower() == 'doc' or doc_data.file_extension.lower() == 'docx'):
                             try:
                                 # Extract text from PDF
                                 texts = []
@@ -491,7 +516,7 @@ class ProjectService:
 
             # Step 3: Insert records into group_projects table
             group_project_entries = [{"group_id": gid, "project_id": project_id} for gid in group_ids]
-            group_project_response = supabase.table("group_projects").insert(group_project_entries).execute()
+            group_project_response = supabase.table("project_groups").insert(group_project_entries).execute()
 
             if not group_project_response.data:
                 raise HTTPException(status_code=500, detail="Failed to associate groups with project")

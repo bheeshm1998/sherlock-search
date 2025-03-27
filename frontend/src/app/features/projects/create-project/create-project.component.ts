@@ -163,16 +163,15 @@ export class CreateProjectComponent {
           complete: () => (this.isSubmitting = false)
         });
       } else {
-        this.projectService.createProject(projectData, files).subscribe({
+        this.projectService.createProject(projectData, files, this.selectedGroups).subscribe({
           next: response => {
             console.log('Project created successfully:', response);
-            this.snackbarService.showSnackbar('Failed to create project.', 'error')
             this.snackbarService.showSnackbar('Project created Successfully.', 'success')
             this.router.navigate(['/admin-dashboard']);
           },
           error: error => {
             console.error('Error creating project:', error);
-            this.snackbarService.showSnackbar('Failed to create project.', 'error');
+            this.snackbarService.showSnackbar(`${error.error.detail}`, 'error');
             this.isSubmitting = false;
           },
           complete: () => (this.isSubmitting = false)

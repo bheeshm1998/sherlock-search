@@ -26,8 +26,9 @@ export class AuthService {
       return this.http.get(`${this.apiUrl}/auth/check-group${id}`);
     }
 
-    loginUser(email: string): Observable<TokenResponse> {
-      const authRequest = { email };
+    loginUser(email: string, userType: string): Observable<TokenResponse> {
+      
+      const authRequest = { email: email, userType: userType };
       
       const headers = new HttpHeaders({
         'Content-Type': 'application/json'

@@ -5,6 +5,7 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { FooterComponent } from "../../components/footer/footer.component";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { SnackbarService } from '../../services/snackbar.service';
 
 @Component({
   selector: 'app-landing-page',
@@ -19,7 +20,7 @@ export class LandingPageComponent {
 
   loginForm: FormGroup;
   
-  constructor(private router: Router, private fb: FormBuilder, private authService: AuthService) {
+  constructor(private router: Router, private fb: FormBuilder, private authService: AuthService, private snackbarService: SnackbarService) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]]
     });
@@ -46,22 +47,28 @@ export class LandingPageComponent {
   }
 
   onSubmit() {
-    if(this.userType == 'admin') {
-      this.router.navigate(['/admin-dashboard']);
-      return
-    }
+    // if(this.userType == 'admin') {
+    //   // if(this.loginForm.value.email == "admin@payoda.com")
+    //   this.router.navigate(['/admin-dashboard']);
+    //   return
+    // }
     if (this.loginForm.valid) {
       const email = this.loginForm.value.email;
   
       // Simulated login API request
-      this.authService.loginUser(email).subscribe({
+      this.authService.loginUser(email, this.userType).subscribe({
         next: (response) => {
           // Assuming the token is in response.token - adjust according to your API response structure
-          this.router.navigate(['/user-dashboard', email]);
+          this.snackbarService.showSnackbar("Login success", "success")
+          if(this.userType == "admin") {
+            this.router.navigate(['/admin-dashboard']);
+          } else {
+            this.router.navigate(['/user-dashboard']);
+          }
         },
         error: (err) => {
           console.error('Login failed:', err);
-          // You might want to add user feedback here (e.g., toast message)
+          this.snackbarService.showSnackbar(err.error.detail, "error")
         }
       });
     }

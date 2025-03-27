@@ -43,6 +43,10 @@ def list_index_vectors():
 
 if __name__ == "__main__":
     list_indexes()
-    list_index_vectors()
-    # delete_index("payoda-index-1")
+    # list_index_vectors()
+    delete_index("project-10")
+    # delete_index("project-3")
+    # delete_index("project-4")
+    # delete_index("project-6")
+    # delete_index("project-7")
     # list_indexes()

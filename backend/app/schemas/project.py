@@ -2,13 +2,13 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional, List
 
-class Group(BaseModel):
-    id: int
-    name: str
+# class Group(BaseModel):
+#     id: int
+#     name: str
 
 # Model for creating a new document
 class DocumentCreate(BaseModel):
-    name: int
+    name: str
     description: Optional[str] = None
     document_type: str
     file_extension: Optional[str] = None
@@ -29,13 +29,12 @@ class DocumentResponse(BaseModel):
 
 # Model for creating a new project
 class ProjectCreate(BaseModel):
-    name: int
+    name: str
     description: Optional[str] = None
     access_type: Optional[str] = None
     state: Optional[str] = "DRAFT"  # Default state is DRAFT
-    groups: Optional[str] = "ALL"
     documents: Optional[List[DocumentCreate]] = None  # Include documents field
-    groups: Optional[List[Group]] = None
+    # groups: Optional[List[Group]] = None
 
 # Model for responding with project details
 class ProjectResponse(BaseModel):
@@ -45,10 +44,10 @@ class ProjectResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     access_type: Optional[str]
-    groups: Optional[str]
     state: str
     documents: List[DocumentResponse]  # Include documents field
-    groups: List[Group]
+
+    # groups: List[Group]
 
     class Config:
         from_attributes = True  # Enable ORM mode (previously `orm_mode`)
@@ -62,4 +61,18 @@ class ProjectAbstractData(BaseModel):
     state: Optional[str] = "DRAFT"  # Default state is DRAFT
     num_documents: int
     updated_at: datetime
-    groups: List[Group]
+    # groups: List[Group]
+
+class ProjectDetailResponse(BaseModel):
+    id: int
+    name: str
+    description: Optional[str] = None
+    access_type: Optional[str] = None
+    state: Optional[str] = "DRAFT"  # Default state is DRAFT
+    num_documents: int
+    updated_at: datetime
+    groups: List[str]
+    documents: List[DocumentResponse]  # Include documents field
+
+    class Config:
+        from_attributes = True  # Enable ORM mode (previously `orm_mode`)

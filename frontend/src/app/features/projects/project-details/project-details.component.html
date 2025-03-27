@@ -19,6 +19,18 @@
       </div>
 
       <div class="max-w-5xl mx-auto p-6 bg-white rounded-xl">
+
+        <div class="flex items-center p-4 bg-teal-50 rounded-lg mb-2">
+          <div class="ml-4">
+            <p class="text-sm text-gray-500">Groups accessible</p>
+            <div class="flex flex-wrap gap-2">
+              <span *ngFor="let group of groups" 
+                    class="px-3 py-1 bg-blue-100 text-blue-700 text-sm font-medium rounded-full border border-blue-400">
+                {{ group }}
+              </span>
+            </div>
+          </div>
+        </div>
         
         <!-- Project Details Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">

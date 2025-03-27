@@ -16,6 +16,7 @@ import { ProjectServiceV2 } from '../../../services/project-service-v2';
 export class ProjectDetailsComponent {
 
   ProjectState = ProjectState;
+  groups: any[] = [];
 
   @Input() projectId: string = "";
   project: any;
@@ -32,7 +33,8 @@ export class ProjectDetailsComponent {
   fetchProjectDetails() {
     this.projectService.getProjectById(this.projectId).subscribe({
       next: response => {
-        this.project = response;
+        this.project = response.project;
+        this.groups = response.groups.map((group: any) => group.name);
         console.log('Project details fetched successfully:', response);
         this.router.navigate(['/project-details', this.projectId]);
       },
