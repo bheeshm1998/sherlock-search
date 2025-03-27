@@ -1,6 +1,7 @@
 import os
 from typing import List, Dict, Any
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Depends, APIRouter, Security, Form
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
@@ -9,7 +10,7 @@ import datetime
 from supabase import create_client, Client
 from fastapi import Query
 
-
+load_dotenv()
 # Supabase Configuration
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_API_KEY")

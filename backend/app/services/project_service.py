@@ -11,9 +11,11 @@ from uuid import uuid4
 from datetime import datetime
 from typing import List,Optional
 
+from supabase import create_client, Client
+
 from app.config.pinecone_init import pc, create_project_index
 from app.database import get_db
-from app.models.project import Project, Document, project_group_association, ProjectGroup
+from app.models.project import Project, Document
 from app.routes.document_routes import get_gemini_embedding
 from app.schemas.project import ProjectCreate, ProjectResponse, ProjectAbstractData
 from app.utils.supabase import upload_to_supabase,delete_from_supabase
@@ -335,7 +337,7 @@ class ProjectService:
 
 
     @staticmethod
-    def create_project_v2(project_data: ProjectCreate, files: List[dict] = None) -> ProjectResponse:
+    def create_project_v2(project_data: ProjectCreate, groups: List[str], files: List[dict] = None ) -> ProjectResponse:
         """
         Create a new project in the database with associated documents.
         """
@@ -347,16 +349,11 @@ class ProjectService:
 
         try:
             # Create project
-            project_id = str(uuid4())
 
             # Ensure a new index is created for the project (if under the limit)
-            try:
-                index_name = create_project_index(project_id)
-            except Exception as e:
-                raise HTTPException(status_code=400, detail=str(e))
+
 
             new_project = Project(
-                id=project_id,
                 name=project_data.name,
                 description=project_data.description,
                 created_at=datetime.now(),
@@ -367,6 +364,14 @@ class ProjectService:
             db.add(new_project)
             db.flush()  # Flush to get project ID without committing
 
+            project_id = new_project.id
+
+            try:
+                index_name = create_project_index(project_id)
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=str(e))
+
+            index = None  # Initialize index to avoid NameError
             # Initialize Pinecone if files are provided
             if files:
                 try:
@@ -386,9 +391,7 @@ class ProjectService:
                         continue
 
                     # Create document record
-                    doc_id = str(uuid4())
                     new_document = Document(
-                        id=doc_id,
                         project_id=project_id,
                         name=doc_data.name,
                         description=doc_data.description,
@@ -398,7 +401,9 @@ class ProjectService:
                         size=doc_data.size
                     )
                     db.add(new_document)
+                    db.flush()
 
+                    doc_id = new_document.id
                     # Process the file if it exists
                     if file_obj:
                         # Save file temporarily
@@ -418,11 +423,15 @@ class ProjectService:
                         # Upload to Supabase
                         try:
                             SUPABASE_BUCKET_NAME = os.getenv("SUPABASE_BUCKET_NAME")
-                            supabase_url = upload_to_supabase(temp_file_path, SUPABASE_BUCKET_NAME,project_id,doc_id)
-                            new_document.s3_url = supabase_url  # Add this field to your Document model
+                            supabase_url = upload_to_supabase(temp_file_path, SUPABASE_BUCKET_NAME, project_id, doc_id)
+                            if supabase_url:
+                                new_document.s3_url = supabase_url
+                            else:
+                                new_document.s3_url = "default"  # Only set default if upload fails
                         except Exception as e:
                             print(f"Supabase upload error: {str(e)}")
-                        new_document.s3_url = "default"
+                            new_document.s3_url = "default"
+
                         # For PDF files, extract text and create embeddings
                         if doc_data.file_extension and doc_data.file_extension.lower() == 'pdf':
                             try:
@@ -472,6 +481,21 @@ class ProjectService:
                         except:
                             pass
 
+            # Step 2: Fetch group IDs based on the provided group names
+            group_query = supabase.table("groups").select("id").in_("name", groups).execute()
+
+            if not group_query.data:
+                raise HTTPException(status_code=404, detail="One or more groups not found")
+
+            group_ids = [group["id"] for group in group_query.data]
+
+            # Step 3: Insert records into group_projects table
+            group_project_entries = [{"group_id": gid, "project_id": project_id} for gid in group_ids]
+            group_project_response = supabase.table("group_projects").insert(group_project_entries).execute()
+
+            if not group_project_response.data:
+                raise HTTPException(status_code=500, detail="Failed to associate groups with project")
+
             # Commit all changes
             db.commit()
             db.refresh(new_project)
@@ -505,29 +529,4 @@ def get_projects_for_user(email: str) -> List[ProjectAbstractData]:
 
     group_ids = [eg["group_id"] for eg in email_groups_data]
 
-    # Step 3: Get group details from groups table
-    groups_response = supabase.from_("groups").select("*").in_("id", group_ids).execute()
-    db: Session = next(get_db())
-    list_of_projects = get_projects_by_group_names(db, groups_response.data)
-    return [
-        ProjectAbstractData(
-            id=project.id,
-            name=project.name,
-            description=project.description,
-            access_type=project.access_type,
-            state=project.state,
-            num_documents=len(project.documents),
-            updated_at=project.updated_at
-        )
-        for project in list_of_projects
-    ]
 
-    return {"groups": groups_response.data}
-
-def get_projects_by_group_names(db: Session, group_names: list[str]):
-    return db.execute(
-        select(Project)
-        .join(project_group_association)
-        .join(ProjectGroup, ProjectGroup.id == project_group_association.c.projectgroup_id)
-        .where(ProjectGroup.name.in_(group_names), Project.state == "PUBLISHED")
-    ).scalars().all()

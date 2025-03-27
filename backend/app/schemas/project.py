@@ -2,6 +2,9 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional, List
 
+class Group(BaseModel):
+    id: int
+    name: str
 
 # Model for creating a new document
 class DocumentCreate(BaseModel):
@@ -32,6 +35,7 @@ class ProjectCreate(BaseModel):
     state: Optional[str] = "DRAFT"  # Default state is DRAFT
     groups: Optional[str] = "ALL"
     documents: Optional[List[DocumentCreate]] = None  # Include documents field
+    groups: Optional[List[Group]] = None
 
 # Model for responding with project details
 class ProjectResponse(BaseModel):
@@ -44,10 +48,10 @@ class ProjectResponse(BaseModel):
     groups: Optional[str]
     state: str
     documents: List[DocumentResponse]  # Include documents field
+    groups: List[Group]
 
     class Config:
         from_attributes = True  # Enable ORM mode (previously `orm_mode`)
-
 
 # Model for creating a new project
 class ProjectAbstractData(BaseModel):
@@ -58,3 +62,4 @@ class ProjectAbstractData(BaseModel):
     state: Optional[str] = "DRAFT"  # Default state is DRAFT
     num_documents: int
     updated_at: datetime
+    groups: List[Group]

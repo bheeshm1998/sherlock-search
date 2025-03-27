@@ -31,7 +31,7 @@ app.include_router(debug_routes.router, prefix="")
 app.include_router(message_routes.router, prefix="")
 app.include_router(document_routes.router, prefix="")
 app.include_router(auth_routes.router, prefix="")
-app.include_router(whatsapp_routes.router, prefix="/whatsapp")
+# app.include_router(whatsapp_routes.router, prefix="/whatsapp")
 
 # mounting the oauth for integration
 # from app.plugins.oauth_auth import app as oauth_auth_app
