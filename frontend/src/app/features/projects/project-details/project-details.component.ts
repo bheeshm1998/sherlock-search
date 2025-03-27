@@ -5,7 +5,9 @@ import { CommonModule } from '@angular/common';
 import { HeaderComponent } from "../../../components/header/header.component";
 import { FooterComponent } from "../../../components/footer/footer.component";
 import { ProjectServiceV2 } from '../../../services/project-service-v2';
+
 import { AuthService } from '../../../services/auth.service';
+
 
 @Component({
   selector: 'app-project-details',
@@ -17,28 +19,27 @@ import { AuthService } from '../../../services/auth.service';
 export class ProjectDetailsComponent {
 
   ProjectState = ProjectState;
-  groups: any[] = [];
 
-  loggedInUserType: string = "";
-
-  projectId: string = "";
-  project: any;
-  
   constructor(private router: Router, private projectService: ProjectServiceV2,  private route: ActivatedRoute, private authService: AuthService ) {}
+
 
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.projectId = params['projectId'];  // Get projectId from route parameters
       this.fetchProjectDetails();
     });
+
     this.loggedInUserType = this.authService.getCurrentUserType();
+
   }
 
   fetchProjectDetails() {
     this.projectService.getProjectById(this.projectId).subscribe({
       next: response => {
+
         this.project = response.project;
         this.groups = response.groups.map((group: any) => group.name);
+
         console.log('Project details fetched successfully:', response);
         this.router.navigate(['/project-details', this.projectId]);
       },
