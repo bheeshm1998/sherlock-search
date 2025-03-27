@@ -7,14 +7,14 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sqlalchemy.orm import Session
 from uuid import uuid4
 from datetime import datetime
-from typing import List
+from typing import List,Optional
 
-from app.config.pinecone_init import pc
+from app.config.pinecone_init import pc, create_project_index
 from app.database import get_db
 from app.models.project import Project, Document
 from app.routes.document_routes import get_gemini_embedding
 from app.schemas.project import ProjectCreate, ProjectResponse, ProjectAbstractData
-from app.utils.supabase import upload_to_supabase
+from app.utils.supabase import upload_to_supabase,delete_from_supabase
 
 
 class ProjectService:
@@ -136,19 +136,159 @@ class ProjectService:
             db.close()
 
     @staticmethod
-    def delete_project(project_id: str) -> bool:
+    def update_project_with_files(
+        project_id: str, name:str, updated_description: str, access_type: str, files: Optional[List[dict]] = None
+    ) -> ProjectResponse:
         """
-        Delete a project by ID.
+        Update an existing project's description, access type, and manage document changes:
+        - Overwrites existing document records.
+        - Removes deleted files from database, Supabase & Pinecone.
+        - Only uploads new documents to Supabase & inserts them into DB.
+        - Updates Pinecone index with only new documents.
         """
         db: Session = next(get_db())
         try:
+            # Fetch the project
             project = db.query(Project).filter(Project.id == project_id).first()
             if not project:
-                return False
+                raise ValueError("Project not found")
 
-            db.delete(project)
+            # Update description & access type
+            project.name = name
+            project.description = updated_description
+            project.access_type = access_type
+            project.updated_at = datetime.now()
+
+            # Fetch project-specific index
+            index_name = f"project-{project_id}"
+            index = pc.Index(index_name)
+
+            # Get existing document records (Filter by `id`, NOT `name`)
+            existing_docs = {doc.id: doc for doc in project.documents}
+
+            # Track processed document IDs
+            processed_doc_ids = set()
+
+            # Process new & existing documents
+            if files:
+                for file_info in files:
+                    file = file_info.get("file")
+                    file_obj = file_info.get("file_obj")
+                    doc_data = file_info.get("doc_data")
+
+                    if not file or not doc_data:
+                        continue
+
+                    # Check if the document already exists based on ID
+                    doc_id = doc_data.id if hasattr(doc_data, "id") else str(uuid4())  
+                    processed_doc_ids.add(doc_id)
+
+                    if doc_id in existing_docs:
+                        # Skip re-uploading existing documents
+                        continue
+
+                    # Create a new document record
+                    new_document = Document(
+                        id=doc_id,
+                        project_id=project_id,
+                        name=doc_data.name,
+                        description=doc_data.description,
+                        uploaded_at=datetime.now(),
+                        document_type=doc_data.document_type,
+                        file_extension=doc_data.file_extension,
+                        size=doc_data.size
+                    )
+                    db.add(new_document)
+
+                    if file_obj:
+                        # Save file temporarily
+                        suffix = f".{doc_data.file_extension}" if doc_data.file_extension else ""
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
+                            temp_file.write(file_obj)
+                            temp_file_path = temp_file.name
+
+                        # Upload to Supabase
+                        try:
+                            SUPABASE_BUCKET_NAME = os.getenv("SUPABASE_BUCKET_NAME")
+                            supabase_url = upload_to_supabase(temp_file_path, SUPABASE_BUCKET_NAME,project.id,doc_id)
+                            new_document.s3_url = supabase_url
+                        except Exception as e:
+                            print(f"Supabase upload error: {str(e)}")
+                            new_document.s3_url = "default"
+
+                        # Process PDF files for embeddings
+                        if doc_data.file_extension.lower() == 'pdf':
+                            try:
+                                texts = []
+                                with pdfplumber.open(temp_file_path) as pdf:
+                                    for page in pdf.pages:
+                                        page_text = page.extract_text()
+                                        if page_text:
+                                            texts.append(page_text)
+
+                                if texts:
+                                    # Split text into chunks
+                                    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+                                    text_chunks = text_splitter.split_text("\n".join(texts))
+
+                                    # Generate embeddings
+                                    embeddings = [get_gemini_embedding(chunk) for chunk in text_chunks]
+
+                                    # Prepare vectors for Pinecone
+                                    vectors = [
+                                        {
+                                            "id": f"project_{project_id}_doc_{new_document.id}_chunk_{i}",
+                                            "values": embedding,
+                                            "metadata": {
+                                                "project_id": project_id,
+                                                "document_id": new_document.id,
+                                                "text": text,
+                                                "project_name": project.name,
+                                                "document_name": doc_data.name
+                                            }
+                                        }
+                                        for i, (text, embedding) in enumerate(zip(text_chunks, embeddings))
+                                    ]
+
+                                    # Insert vectors into Pinecone in batches
+                                    batch_size = 100
+                                    for i in range(0, len(vectors), batch_size):
+                                        batch = vectors[i:i + batch_size]
+                                        index.upsert(vectors=batch)
+                            except Exception as e:
+                                print(f"PDF processing error: {str(e)}")
+
+                        # Cleanup temp file
+                        try:
+                            os.remove(temp_file_path)
+                        except Exception as e:
+                            print(f"Error deleting temp file: {e}")
+
+            # Find and delete removed documents (Filter by ID, NOT name)
+            removed_docs = set(existing_docs.keys()) - processed_doc_ids
+            for doc_id in removed_docs:
+                doc_to_remove = existing_docs[doc_id]
+
+                # Delete from Supabase
+                try:
+                    delete_from_supabase(doc_to_remove.s3_url)
+                except Exception as e:
+                    print(f"Supabase deletion error: {str(e)}")
+
+                # Delete from Pinecone
+                try:
+                    index.delete(ids=[f"project_{project_id}_doc_{doc_to_remove.id}"])
+                except Exception as e:
+                    print(f"Pinecone deletion error: {str(e)}")
+
+                # Remove from database
+                db.delete(doc_to_remove)
+
+            # Commit all changes
             db.commit()
-            return True
+            db.refresh(project)
+            return ProjectResponse.model_validate(project)
+
         except Exception as e:
             db.rollback()
             raise e
@@ -189,6 +329,13 @@ class ProjectService:
         try:
             # Create project
             project_id = str(uuid4())
+
+            # Ensure a new index is created for the project (if under the limit)
+            try:
+                index_name = create_project_index(project_id)
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=str(e))
+
             new_project = Project(
                 id=project_id,
                 name=project_data.name,
@@ -204,7 +351,7 @@ class ProjectService:
             # Initialize Pinecone if files are provided
             if files:
                 try:
-                    index = pc.Index(os.environ.get("PINECONE_INDEX_NAME"))
+                    index = pc.Index(index_name)
                 except Exception as e:
                     print(f"Error initializing Pinecone: {str(e)}")
                     # Continue anyway, we'll skip vector storage if Pinecone fails
@@ -252,7 +399,7 @@ class ProjectService:
                         # Upload to Supabase
                         try:
                             SUPABASE_BUCKET_NAME = os.getenv("SUPABASE_BUCKET_NAME")
-                            supabase_url = upload_to_supabase(temp_file_path, SUPABASE_BUCKET_NAME,  doc_data.name)
+                            supabase_url = upload_to_supabase(temp_file_path, SUPABASE_BUCKET_NAME,project_id,doc_id)
                             new_document.s3_url = supabase_url  # Add this field to your Document model
                         except Exception as e:
                             print(f"Supabase upload error: {str(e)}")
