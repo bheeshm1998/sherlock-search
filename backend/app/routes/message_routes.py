@@ -30,7 +30,7 @@ def get_messages(project_id: str, user_id: str):
 async def chat(request: MessageCreate):
     try:
         # Call the service to handle the chat logic
-        chatService = ChatService()
+        chatService = ChatService(project_id = request.project_id)
         messageService = MessageService()
         messageService.create_message(request)
         response = chatService.handle_chat(user_message = request.content)

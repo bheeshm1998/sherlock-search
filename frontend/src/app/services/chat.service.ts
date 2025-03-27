@@ -18,7 +18,8 @@ export class ChatService {
       {
         content: message,  // Changed from 'query' to 'content' to match Python model
         project_id: project_id,
-        user_id: user_id
+        user_id: user_id,
+        role:"user"
       }
     ).pipe(
       map(response => response.response),
@@ -28,6 +29,10 @@ export class ChatService {
       })
     );
 }
+
+  getMessages(projectId: any, userId: any): Observable<any> {
+    return this.http.get(`${this.apiUrl}/messages/${projectId}/${userId}`);
+  }
   
   getFAQs(): Observable<{question: string, answer: string}[]> {
     // This could be replaced with an actual API call if you have a FAQ endpoint

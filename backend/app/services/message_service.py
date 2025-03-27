@@ -15,7 +15,6 @@ class MessageService:
         db: Session = next(get_db())  # The database dependency is only here
         try:
             new_message = Message(
-                id=str(uuid.uuid4()),  # Generate a unique ID
                 content=message_data.content,
                 role=message_data.role,  # User role
                 timestamp=datetime.utcnow(),  # Timestamp added
@@ -37,7 +36,6 @@ class MessageService:
         db: Session = next(get_db())  # The database dependency is only here
         try:
             new_message = Message(
-                id=str(uuid.uuid4()),  # Generate a unique ID
                 content=content,
                 role="assistant",  # Assistant role
                 timestamp=datetime.utcnow(),  # Timestamp added
@@ -77,7 +75,6 @@ class MessageService:
         db: Session = next(get_db())  # The database dependency is only here
         try:
             new_message = Message(
-                id=str(uuid.uuid4()),  # Generate a unique ID
                 content=message_data.content,
                 role=message_data.role,  # Assistant role
                 timestamp=datetime.utcnow(),  # Timestamp added

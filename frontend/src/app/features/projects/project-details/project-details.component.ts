@@ -21,7 +21,7 @@ export class ProjectDetailsComponent {
 
   loggedInUserType: string = "";
 
-  @Input() projectId: string = "";
+  projectId: string = "";
   project: any;
   
   constructor(private router: Router, private projectService: ProjectServiceV2,  private route: ActivatedRoute, private authService: AuthService ) {}
@@ -61,7 +61,7 @@ export class ProjectDetailsComponent {
 
   openChat() {
     console.log("Navigating to the chat component")
-    this.router.navigate(['/chat', 1]);
+    this.router.navigate(['/chat', this.projectId]);
   }
 
   deleteProject() {

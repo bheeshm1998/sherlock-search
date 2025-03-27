@@ -3,11 +3,6 @@ export interface Message {
   content: string;
   role: 'user' | 'assistant' | 'system';
   timestamp: Date;
-  projectId: string;
-  isRead?: boolean;
-  reactionType?: string;
-  // Add for better history view
-  preview?: string;
 }
 
 export interface MessageGroup {

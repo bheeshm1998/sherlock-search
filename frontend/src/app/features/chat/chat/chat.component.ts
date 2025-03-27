@@ -7,7 +7,7 @@ import { LlmService } from '../../../services/llm.service';
 import { MessageService } from '../../../services/message.service';
 import { ProjectService } from '../../../services/project.services';
 import { HeaderComponent } from '../../../components/header/header.component';
-import { NgFor, NgIf, AsyncPipe, DatePipe } from '@angular/common';
+import { NgFor, NgIf, AsyncPipe, DatePipe, CommonModule } from '@angular/common';
 import { InputFieldComponent } from '../../../components/input-field/input-field.component';
 import { MessageBubbleComponent } from '../../../components/message-bubble/message-bubble.component';
 import { ChatService } from '../../../services/chat.service';
@@ -16,18 +16,20 @@ import { AuthService } from '../../../services/auth.service';
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [NgFor, NgIf, AsyncPipe, DatePipe, HeaderComponent, InputFieldComponent, MessageBubbleComponent],
+  imports: [NgFor, NgIf, AsyncPipe, DatePipe, HeaderComponent, InputFieldComponent, MessageBubbleComponent, CommonModule],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
 })
 export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
   
-  messages = this.messageService.messages;
-  messageGroups = this.messageService.messageGroups;
+  // messages = this.messageService.messages;
+  // messageGroups = this.messageService.messageGroups;
   currentProject: Project | undefined;
   isLoading = false;
-  faqs!: Observable<{question: string, answer: string}[]>;
+  // faqs!: Observable<{question: string, answer: string}[]>;
+
+  messages: Message[] = [];
 
   userId: any = "";
   
@@ -44,19 +46,12 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   ) {}
   
   ngOnInit(): void {
-    this.subscriptions.push(
-      this.route.paramMap.subscribe(params => {
-        const id = params.get('id');
-        if (id) {
-          this.projectId = id;
-          this.loadProject();
-        } else {
-          this.router.navigate(['/projects']);
-        }
-      })
-    );
+    this.route.params.subscribe(params => {
+      this.projectId = params['projectId']; 
+    });
     this.userId = this.authService.getCurrentUser();
-    this.faqs = this.chatService.getFAQs();
+    this.loadMessages();
+    // this.faqs = this.chatService.getFAQs();
   }
   
   ngAfterViewChecked(): void {
@@ -87,6 +82,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
         next: (response) => {
           this.messageService.addAssistantMessage(response);
           this.isLoading = false;
+          this.loadMessages();
         },
         error: (error) => {
           console.error('Error getting response:', error);
@@ -95,6 +91,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
         }
       })
     );
+    
   }
   
   askQuestion(question: string): void {
@@ -124,4 +121,15 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       console.error('Error scrolling to bottom:', err);
     }
   }
+  loadMessages() {
+    this.chatService.getMessages(this.projectId, this.userId).subscribe({
+      next: (data) => {
+        this.messages = data;
+      },
+      error: (err) => {
+        console.error('Error fetching messages:', err);
+      } 
+    });
+  }
+
 }
