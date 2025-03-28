@@ -1,6 +1,6 @@
 import os
 import tempfile
-import numpy as np
+
 import pdfplumber
 from fastapi import HTTPException
 from langchain_text_splitters import RecursiveCharacterTextSplitter
