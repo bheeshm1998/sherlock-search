@@ -34,8 +34,8 @@ def list_index_vectors():
         # Retrieve index statistics
         try:
             stats = index.describe_index_stats()
-            vector_count = stats.get("total_vector_count")  # ✅ Added this line
-            print(f"Total Vectors: {vector_count}")  # ✅ Now prints vector count
+            vector_count = stats.get("total_vector_count")
+            print(f"Total Vectors: {vector_count}")
         
         except Exception as e:
             print(f"   ⚠️ Error retrieving index stats: {e}")
@@ -44,9 +44,9 @@ def list_index_vectors():
 if __name__ == "__main__":
     list_indexes()
     # list_index_vectors()
-    delete_index("project-10")
-    # delete_index("project-3")
-    # delete_index("project-4")
-    # delete_index("project-6")
-    # delete_index("project-7")
+    # delete_index("project-30")
+    delete_index("project-31")
+    # delete_index("project-11")
+    # delete_index("project-23")
+    # delete_index("project-22")
     # list_indexes()

@@ -80,3 +80,9 @@ class ChatService():
         )
 
         return response.text
+
+    def get_response_from_gemini(self, system_prompt, user_prompt):
+        response = self.gemini_model.generate_content(
+            [system_prompt, user_prompt]  # Gemini expects a list of strings
+        )
+        return response

@@ -141,7 +141,7 @@ async def update_project2(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/projects/{project_id}", response_model=dict)
-async def delete_project(project_id: str):
+async def delete_project(project_id: int):
     """
     Delete an existing project.
     """
@@ -190,7 +190,7 @@ async def publish_project(project_id: str):
 #         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/projects/user/{user_id}", response_model=List[ProjectAbstractData])
-async def get_projects_for_user_v2(user_id: str, user: dict = Depends(get_current_user)):
+async def get_projects_for_user_v2(user_id: str):
     """
     Publish an existing project by updating its state to 'published'.
     """

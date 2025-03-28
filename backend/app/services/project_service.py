@@ -1,6 +1,6 @@
 import os
 import tempfile
-
+import numpy as np
 import pdfplumber
 from fastapi import HTTPException
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -448,10 +448,11 @@ class ProjectService:
 
                         # Upload to Supabase
                         try:
-                            SUPABASE_BUCKET_NAME = os.getenv("SUPABASE_BUCKET_NAME")
-                            supabase_url = upload_to_supabase(temp_file_path, SUPABASE_BUCKET_NAME, project_id, doc_id)
-                            if supabase_url:
-                                new_document.s3_url = supabase_url
+                            # SUPABASE_BUCKET_NAME = os.getenv("SUPABASE_BUCKET_NAME")
+                            # supabase_url = upload_to_supabase(temp_file_path, SUPABASE_BUCKET_NAME, project_id, doc_id)
+                            # if supabase_url:
+                            #     new_document.s3_url = supabase_url
+                            new_document.s3_url = "default"
                         except Exception as e:
                             print(f"Supabase upload error: {str(e)}")
 
@@ -468,7 +469,11 @@ class ProjectService:
 
                                 if texts and index:
                                     # Split text into chunks
-                                    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+                                    text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
+                                        chunk_size=1000,
+                                        chunk_overlap=200,
+                                        separators=["\n\n", "\n", " ", ""]
+                                    )
                                     text_chunks = text_splitter.split_text("\n".join(texts))
 
                                     # Generate embeddings
@@ -495,6 +500,7 @@ class ProjectService:
                                     for i in range(0, len(vectors), batch_size):
                                         batch = vectors[i:i + batch_size]
                                         index.upsert(vectors=batch)
+
                             except Exception as e:
                                 print(f"PDF processing error: {str(e)}")
 
@@ -590,4 +596,87 @@ class ProjectService:
             ]
 
 
+    @staticmethod
+    def delete_project(project_id: int):
+        """
+        Delete a project and its associated resources:
+        - Remove project from database
+        - Delete associated documents from Supabase
+        - Delete Pinecone index
+        - Remove project-group associations
+        """
+        db: Session = next(get_db())
+        try:
+            # Find the project
+            project = db.query(Project).filter(Project.id == project_id).first()
+            if not project:
+                raise ValueError("Project not found")
 
+            # Get the Pinecone index name
+            index_name = f"project-{project_id}"
+
+            # Delete documents from Supabase and Pinecone
+            try:
+                # Fetch the Pinecone index
+                index = pc.Index(index_name)
+
+                # Delete document vectors from Pinecone
+                for document in project.documents:
+                    # Delete Supabase file
+                    # try:
+                    #     delete_from_supabase(document.s3_url)
+                    # except Exception as e:
+                    #     print(f"Supabase deletion error: {str(e)}")
+
+                    # Delete document vectors from Pinecone
+                    try:
+                        # # Delete all vectors associated with this document
+                        # vector_ids = [
+                        #     f"project_{project_id}_doc_{document.id}_chunk_{i}"
+                        #     for i in range(1000)  # Assume a reasonable max number of chunks
+                        # ]
+                        # index.delete(ids=vector_ids)
+                        if check_pinecone_index_exists(index_name):
+                            try:
+                                pc.delete_index(index_name)
+                            except Exception as e:
+                                print(f"Error deleting Pinecone index: {str(e)}")
+
+                    except Exception as e:
+                        print(f"Pinecone vector deletion error: {str(e)}")
+
+            except Exception as e:
+                print(f"Error accessing Pinecone index: {str(e)}")
+
+            # Delete project-group associations from Supabase
+            # try:
+            #     supabase.table("project_groups").delete().eq("project_id", project_id).execute()
+            # except Exception as e:
+            #     print(f"Error deleting project group associations: {str(e)}")
+
+            # Delete Pinecone index
+            # try:
+            #     pc.delete_index(index_name)
+            # except Exception as e:
+            #     print(f"Error deleting Pinecone index: {str(e)}")
+
+            # Delete project and associated documents from database
+            db.delete(project)
+            db.commit()
+
+            return {"message": "Project deleted successfully"}
+
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=str(e))
+        finally:
+            db.close()
+
+
+def check_pinecone_index_exists(index_name: str) -> bool:
+    try:
+        # This will raise an exception if the index doesn't exist
+        pc.describe_index(index_name)
+        return True
+    except Exception:
+        return False
