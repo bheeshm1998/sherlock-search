@@ -4,8 +4,6 @@ import tempfile
 import pdfplumber
 from fastapi import HTTPException
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from sklearn.utils import deprecated
-from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 from uuid import uuid4
 from datetime import datetime
