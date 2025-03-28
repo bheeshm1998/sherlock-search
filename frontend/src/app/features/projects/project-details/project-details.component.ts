@@ -57,11 +57,17 @@ export class ProjectDetailsComponent {
   }
 
   editProject() {
+    
     this.router.navigate(['/edit-project', this.project.id]);
   }
 
   gotoDashBoard() {
-    this.router.navigate(['/admin-dashboard']);
+    if(this.loggedInUserType == "enduser") {
+      this.router.navigate(['/user-dashboard']);
+    }
+      else{
+        this.router.navigate(['/admin-dashboard']);
+      }
   }
 
   openChat() {
