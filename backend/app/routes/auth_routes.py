@@ -41,31 +41,31 @@ class GroupsResponse(BaseModel):
 @router.post("/auth/login", response_model=TokenResponse)
 async def login(auth_request: AuthRequest):
     # Query Supabase to check if user exists
-    TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTYiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE2NjAwMDAwMDAsImV4cCI6MTk3NTY4MDAwMH0.dummy-signature-placeholder"
+    # TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTYiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE2NjAwMDAwMDAsImV4cCI6MTk3NTY4MDAwMH0.dummy-signature-placeholder"
 
-    return {"token": TOKEN}
-    # response = supabase.table("employees").select("*").eq("email", auth_request.email).execute()
-    #
-    # # Check if user was found
-    # if not response.data:
-    #     raise HTTPException(status_code=401, detail="Invalid email")
-    #
-    # # Get the first (and should be only) user
-    # user = response.data[0]
-    #
-    # # Generate JWT Token
-    # token_data = {
-    #     "email": user["email"],
-    #     "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
-    # }
-    # token = jwt.encode(token_data, SECRET_KEY, algorithm="HS256")
-    # if(auth_request.userType == "admin"):
-    #     if (user["email"] == "abhishek.a@payoda.com"):
-    #         return {"token": token}
-    #     else :
-    #         raise HTTPException(status_code=401, detail="Not an admin")
-    # else :
-    #     return {"token": token}
+    # return {"token": TOKEN}
+    response = supabase.table("employees").select("*").eq("email", auth_request.email).execute()
+    
+    # Check if user was found
+    if not response.data:
+        raise HTTPException(status_code=401, detail="Invalid email")
+    
+    # Get the first (and should be only) user
+    user = response.data[0]
+    
+    # Generate JWT Token
+    token_data = {
+        "email": user["email"],
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+    }
+    token = jwt.encode(token_data, SECRET_KEY, algorithm="HS256")
+    if(auth_request.userType == "admin"):
+        if (user["email"] == "abhishek.a@payoda.com"):
+            return {"token": token}
+        else :
+            raise HTTPException(status_code=401, detail="Not an admin")
+    else :
+        return {"token": token}
 
 
 # Dependency to Get Current User from Token
