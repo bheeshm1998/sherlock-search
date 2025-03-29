@@ -65,7 +65,7 @@ async def login(auth_request: AuthRequest):
     # pyjwt.encode(token_data, SECRET_KEY, algorithm="HS256")
     if(auth_request.userType == "admin"):
         if (user["email"] == "abhishek.a@payoda.com"):
-            return {"token": token}
+            return {"token": TOKEN}
         else :
             raise HTTPException(status_code=401, detail="Not an admin")
     # else :
